@@ -17,16 +17,25 @@ from transformers.trainer_utils import PREFIX_CHECKPOINT_DIR
 
 from utils import replicability
 
-torch.backends.cuda.matmul.allow_tf32 = True  # A bool that controls whether TensorFloat-32 tensor cores may be used in matrix multiplications on Ampere or newer GPUs.
+# A bool that controls whether TensorFloat-32 tensor cores may be used in matrix multiplications on Ampere or newer GPUs.
+torch.backends.cuda.matmul.allow_tf32 = True
 IGNORE_INDEX = -100
 
 
-def init_logger(level=logging.INFO):
-    logging.basicConfig(level=level)
-    return logging.getLogger()
+def init_logger(level=logging.INFO, log_file=None):
+    logger = logging.getLogger()
+    logger.setLevel(level)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    ch = logging.StreamHandler()
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
 
+    if log_file:
+        fh = logging.FileHandler(log_file)
+        fh.setFormatter(formatter)
+        logger.addHandler(fh)
 
-logger = init_logger(level=logging.DEBUG)
+    return logger
 
 
 def parser_binary(text):
@@ -674,6 +683,9 @@ if __name__ == '__main__':
     args.qrels_name = ".".join(args.qrels_path.split("/")[-1].split(".")[0:-1])
 
     args.prompter = Prompter(args)
+
+    logger = init_logger(level=logging.DEBUG, log_file='judge_relevance.log')
+    logger.debug(f"Global args: {args}")
 
     if not args.rj:
         args.retriever = "-".join(args.run_path.split("/")[-1].split(".")[1].split("-")[1:])
