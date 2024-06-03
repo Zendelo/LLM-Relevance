@@ -26,15 +26,9 @@ def init_logger(level=logging.INFO, log_file=None):
     logger = logging.getLogger()
     logger.setLevel(level)
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-    ch = logging.StreamHandler()
+    ch = logging.FileHandler(log_file) if log_file else logging.StreamHandler()
     ch.setFormatter(formatter)
     logger.addHandler(ch)
-
-    if log_file:
-        fh = logging.FileHandler(log_file)
-        fh.setFormatter(formatter)
-        logger.addHandler(fh)
-
     return logger
 
 
@@ -72,7 +66,9 @@ class Prompter:
     def __init__(self, args):
         self.args = args
         if self.args.prompt == "binary":
-            self.template = "Instruction: Please assess the relevance of the provided passage to the following question. Please output \"Relevant\" or \"Irrelevant\".\n{demonstrations}Question: {question}\nPassage: {passage}\nOutput:"
+            self.template = ("Instruction: Please assess the relevance of the provided passage to the following"
+                             " question. Please output \"Relevant\" or \"Irrelevant\".\n{demonstrations}Question:"
+                             " {question}\nPassage: {passage}\nOutput:")
             self.spliter = "Output: "
             self.pos_label = "Relevant"
             self.neg_label = "Irrelevant"
@@ -273,7 +269,7 @@ def load_qpp_data(args):
     return examples
 
 
-def load_rj_data(args):
+def load_rj_data(args) -> list[dict[str, str]]:
     query = {}
     query_reader = open(args.query_path, 'r').readlines()
     for line in query_reader:
