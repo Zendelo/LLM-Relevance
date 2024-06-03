@@ -1,37 +1,45 @@
-import torch
-import transformers
-from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
-from peft import prepare_model_for_kbit_training, LoraConfig, get_peft_model,PeftModel, get_peft_model_state_dict
-from peft.tuners.lora import LoraLayer
-from datasets import load_dataset,Dataset
 import argparse
-from utils import replicability
-import bitsandbytes as bnb
 import json
+import logging
 import os
-import tqdm
 import random
 
+import bitsandbytes as bnb
 import pytrec_eval
+import torch
+import tqdm
+import transformers
+from datasets import Dataset
+from peft import prepare_model_for_kbit_training, LoraConfig, get_peft_model, PeftModel
 from pyserini.search.lucene import LuceneSearcher
+from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 from transformers.trainer_utils import PREFIX_CHECKPOINT_DIR
+from utils import replicability
 
-torch.backends.cuda.matmul.allow_tf32 = True # A bool that controls whether TensorFloat-32 tensor cores may be used in matrix multiplications on Ampere or newer GPUs.
+torch.backends.cuda.matmul.allow_tf32 = True  # A bool that controls whether TensorFloat-32 tensor cores may be used in matrix multiplications on Ampere or newer GPUs.
 IGNORE_INDEX = -100
 
 
+def init_logger(level=logging.INFO):
+    logging.basicConfig(level=level)
+    return logging.getLogger()
+
+
+logger = init_logger(level=logging.DEBUG)
+
+
 def parser_binary(text):
-
     if text in ["Relevant", "Irrelevant"]:
-        return "1" if text =="Relevant" else "0"
+        return "1" if text == "Relevant" else "0"
 
-    print(f"Parsing:***********\nOriginal text:\n{text}\n")
+    logger.info(f"Parsing:***********\nOriginal text:\n{text}\n")
     if "Irrelevant" in text or "Ir" in text:
         text_ = "0"
     else:
         text_ = "1"
-    print(f"Parsed text:\n{text_}\n***********\n")
+    logger.info(f"Parsed text:\n{text_}\n***********\n")
     return text_
+
 
 def extract_first_digit(text):
     for char in text:
@@ -39,24 +47,26 @@ def extract_first_digit(text):
             return char
     return "0"
 
+
 def parser_digit(text):
     if text in ["0", "1", "2", "3", "4"]:
         return text
     else:
-        print(f"Parsing:***********\nOriginal text:\n{text}\n")
+        logger.info(f"Parsing:***********\nOriginal text:\n{text}\n")
         text_ = extract_first_digit(text)
-        print(f"Parsed text:\n{text_}\n***********\n")
+        logger.info(f"Parsed text:\n{text_}\n***********\n")
     return text_
+
 
 class Prompter:
     def __init__(self, args):
-        self.args=args
+        self.args = args
         if self.args.prompt == "binary":
-            self.template ="Instruction: Please assess the relevance of the provided passage to the following question. Please output \"Relevant\" or \"Irrelevant\".\n{demonstrations}Question: {question}\nPassage: {passage}\nOutput:"
-            self.spliter="Output: "
-            self.pos_label ="Relevant"
-            self.neg_label="Irrelevant"
-            self.demonstration="Question: {question}\nPassage: {passage}\nOutput: {output}\n"
+            self.template = "Instruction: Please assess the relevance of the provided passage to the following question. Please output \"Relevant\" or \"Irrelevant\".\n{demonstrations}Question: {question}\nPassage: {passage}\nOutput:"
+            self.spliter = "Output: "
+            self.pos_label = "Relevant"
+            self.neg_label = "Irrelevant"
+            self.demonstration = "Question: {question}\nPassage: {passage}\nOutput: {output}\n"
             self.parser = parser_binary
 
         elif self.args.prompt == "ikat":
@@ -71,7 +81,7 @@ class Prompter:
 
 class SavePeftModelCallback(transformers.TrainerCallback):
     def save_model(self, args, state, kwargs):
-        print('Saving PEFT checkpoint...')
+        logger.info('Saving PEFT checkpoint...')
         if state.best_model_checkpoint is not None:
             checkpoint_folder = os.path.join(state.best_model_checkpoint, "adapter_model")
         else:
@@ -98,6 +108,7 @@ class SavePeftModelCallback(transformers.TrainerCallback):
         touch(os.path.join(args.output_dir, 'completed'))
         self.save_model(args, state, kwargs)
 
+
 def load_qpp_data(args):
     query = {}
     query_reader = open(args.query_path, 'r').readlines()
@@ -114,8 +125,8 @@ def load_qpp_data(args):
         qrels = pytrec_eval.parse_qrel(f_qrels)
 
     examples = []
-    pos_num=0
-    neg_num=0
+    pos_num = 0
+    neg_num = 0
 
     if args.query_demon_path is not None:
         query_demon = {}
@@ -130,7 +141,7 @@ def load_qpp_data(args):
             run_demon = pytrec_eval.parse_run(f_run)
 
         with open(args.qrels_demon_path, 'r') as f_qrels:
-            qrels_demon  = pytrec_eval.parse_qrel(f_qrels)
+            qrels_demon = pytrec_eval.parse_qrel(f_qrels)
 
         # postive examples
         demonstration_list = []
@@ -139,7 +150,7 @@ def load_qpp_data(args):
             if qid not in qrels_demon:
                 continue
 
-            demonstration=""
+            demonstration = ""
 
             pid_list = [pid for (pid, score) in sorted(run_demon[qid].items(), key=lambda x: x[1], reverse=True)]
 
@@ -149,7 +160,7 @@ def load_qpp_data(args):
                 passage_text = passage_dict['contents'] if 'contents' in passage_dict else passage_dict['passage']
                 passage_text = passage_text.replace("\t", " ").replace("\n", " ").replace("\r", " ")
 
-                demonstration+= DEMONSTRATION.format(question=qtext, passage=passage_text, output=POS_LABEL)
+                demonstration += DEMONSTRATION.format(question=qtext, passage=passage_text, output=POS_LABEL)
                 # one query only has one positive passage
                 break
 
@@ -159,7 +170,7 @@ def load_qpp_data(args):
                     pid_list.remove(pid)
 
             if len(pid_list) < args.num_negs:
-                print(qid, qrels[qid], pid_list)
+                logger.info(qid, qrels[qid], pid_list)
                 continue
 
             # one query only has a negative passage
@@ -169,14 +180,14 @@ def load_qpp_data(args):
                 passage_text = passage_dict['contents'] if 'contents' in passage_dict else passage_dict['passage']
                 passage_text = passage_text.replace("\t", " ").replace("\n", " ").replace("\r", " ")
 
-            demonstration+= DEMONSTRATION.format(question=qtext, passage=passage_text, output=NEG_LABEL)
+            demonstration += DEMONSTRATION.format(question=qtext, passage=passage_text, output=NEG_LABEL)
 
             demonstration_list.append(demonstration)
 
         demonstration_list_sampled = random.sample(demonstration_list, args.num_demon_per_class)
         demonstrations = "".join(demonstration_list_sampled)
 
-    print(f"demonstrations:\n{demonstrations}")
+    logger.info(f"demonstrations:\n{demonstrations}")
 
     for qid, qtext in query.items():
         if qid not in qrels:
@@ -193,13 +204,15 @@ def load_qpp_data(args):
                 passage_text = passage_text.replace("\t", " ").replace("\n", " ").replace("\r", " ")
 
                 if args.query_demon_path is not None:
-                    example["input"] = TEMPLATE.format(demonstrations=demonstrations, question=qtext,passage=passage_text[:args.max_char_len])
+                    example["input"] = TEMPLATE.format(demonstrations=demonstrations, question=qtext,
+                                                       passage=passage_text[:args.max_char_len])
                 else:
-                    example["input"] = TEMPLATE.format(demonstrations=None, question=qtext,passage=passage_text[:args.max_char_len])
+                    example["input"] = TEMPLATE.format(demonstrations=None, question=qtext,
+                                                       passage=passage_text[:args.max_char_len])
 
                 rel_grade = qrels[qid][pid] if pid in qrels[qid] else 0
 
-                if rel_grade >=2:
+                if rel_grade >= 2:
                     example["output"] = POS_LABEL
                     pos_num += 1
                 else:
@@ -218,7 +231,7 @@ def load_qpp_data(args):
                 passage_text = passage_dict['contents'] if 'contents' in passage_dict else passage_dict['passage']
                 passage_text = passage_text.replace("\t", " ").replace("\n", " ").replace("\r", " ")
 
-                example["input"] = TEMPLATE.format(question=qtext,passage=passage_text)
+                example["input"] = TEMPLATE.format(question=qtext, passage=passage_text)
 
                 example["output"] = POS_LABEL
                 examples.append(example)
@@ -228,14 +241,14 @@ def load_qpp_data(args):
                 if pid in pid_list:
                     pid_list.remove(pid)
 
-            if len(pid_list)<args.num_negs:
-                print(qid, qrels[qid], pid_list)
+            if len(pid_list) < args.num_negs:
+                logger.info(qid, qrels[qid], pid_list)
                 continue
 
             neg_pid_list = random.sample(pid_list, args.num_negs)
 
             for pid in neg_pid_list:
-                #negative examples
+                # negative examples
                 example["example_id"] = f"{qid}#neg#{pid}"
                 passage_dict = json.loads(searcher.doc(pid).raw())
                 passage_text = passage_dict['contents'] if 'contents' in passage_dict else passage_dict['passage']
@@ -243,12 +256,12 @@ def load_qpp_data(args):
 
                 example["input"] = TEMPLATE.format(question=qtext, passage=passage_text)
                 example["output"] = NEG_LABEL
-                neg_num+=1
+                neg_num += 1
 
-
-    print(f"pos_num: {pos_num}, neg_num: {neg_num}")
-    print("sanity check: {}\n{}\n".format(examples[0]["input"],examples[-1]["input"]))
+    logger.info(f"pos_num: {pos_num}, neg_num: {neg_num}")
+    logger.info("sanity check: {}\n{}\n".format(examples[0]["input"], examples[-1]["input"]))
     return examples
+
 
 def load_rj_data(args):
     query = {}
@@ -279,7 +292,7 @@ def load_rj_data(args):
         qrels = pytrec_eval.parse_qrel(f_qrels)
 
     examples = []
-    count={}
+    count = {}
 
     for qid, pid2rel in qrels.items():
         for pid, rel in pid2rel.items():
@@ -290,7 +303,8 @@ def load_rj_data(args):
                 passage_text = passage_dict['contents'] if 'contents' in passage_dict else passage_dict['passage']
                 passage_text = passage_text.replace("\t", " ").replace("\n", " ").replace("\r", " ")
 
-                example["input"] = args.prompter.template.format(demonstrations="", question=query[qid],passage=passage_text[:args.max_char_len])
+                example["input"] = args.prompter.template.format(demonstrations="", question=query[qid],
+                                                                 passage=passage_text[:args.max_char_len])
 
                 if rel >= 2:
                     example["output"] = args.prompter.pos_label
@@ -301,13 +315,15 @@ def load_rj_data(args):
 
             elif "ikat" == args.dataset_class:
                 if args.prompt == "ikat":
-                    example["input"] = args.prompter.template.format(query=query[qid], ptkb=ptkb[qid],passage=corpus[pid][:args.max_char_len])
+                    example["input"] = args.prompter.template.format(query=query[qid], ptkb=ptkb[qid],
+                                                                     passage=corpus[pid][:args.max_char_len])
                     example["example_id"] = f"{qid}#{rel}#{pid}"
                     example["output"] = str(rel)
 
                 elif args.prompt == "binary":
 
-                    example["input"] = args.prompter.template.format(demonstrations="", question=query[qid], passage=corpus[pid][:args.max_char_len])
+                    example["input"] = args.prompter.template.format(demonstrations="", question=query[qid],
+                                                                     passage=corpus[pid][:args.max_char_len])
 
                     if rel >= 2:
                         example["output"] = args.prompter.pos_label
@@ -316,17 +332,16 @@ def load_rj_data(args):
                         example["output"] = args.prompter.neg_label
                         example["example_id"] = f"{qid}#neg#{pid}"
 
-
             if example["output"] not in count:
-                count[example["output"]]=1
+                count[example["output"]] = 1
             else:
-                count[example["output"]]+=1
+                count[example["output"]] += 1
 
-            print(example["input"],"\n")
+            logger.info(example["input"], "\n")
 
             examples.append(example)
 
-    print(count)
+    logger.info(count)
     return examples
 
 
@@ -340,9 +355,10 @@ def print_trainable_parameters(model):
         all_param += param.numel()
         if param.requires_grad:
             trainable_params += param.numel()
-    print(
+    logger.info(
         f"trainable params: {trainable_params} || all params: {all_param} || trainable%: {100 * trainable_params / all_param}"
     )
+
 
 def find_all_linear_names(model):
     cls = bnb.nn.Linear4bit
@@ -352,7 +368,7 @@ def find_all_linear_names(model):
             names = name.split('.')
             lora_module_names.add(names[0] if len(names) == 1 else names[-1])
 
-    if 'lm_head' in lora_module_names: # needed for 16-bit
+    if 'lm_head' in lora_module_names:  # needed for 16-bit
         lora_module_names.remove('lm_head')
     return list(lora_module_names)
 
@@ -373,25 +389,26 @@ def train(args):
         cache_dir=args.cache_dir,
         token=args.token,
         quantization_config=BitsAndBytesConfig(
-        load_in_4bit=True,
-        bnb_4bit_use_double_quant=True,
-        bnb_4bit_quant_type="nf4",
-        bnb_4bit_compute_dtype=torch.bfloat16,
-        llm_int8_has_fp16_weight=False,
-    ))
+            load_in_4bit=True,
+            bnb_4bit_use_double_quant=True,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_compute_dtype=torch.bfloat16,
+            llm_int8_has_fp16_weight=False,
+        ))
 
-    tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path, padding_side=args.padding_side, cache_dir=args.cache_dir, token=args.token)
+    tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path, padding_side=args.padding_side,
+                                              cache_dir=args.cache_dir, token=args.token)
 
     tokenizer.pad_token = tokenizer.eos_token
     tokenizer.padding_side = args.padding_side
 
-    model.config.torch_dtype =torch.bfloat16
+    model.config.torch_dtype = torch.bfloat16
     model.config.pad_token_id = model.config.eos_token_id
     model.generation_config.pad_token_id = model.generation_config.eos_token_id
-    #model.generation_config.eos_token_id = model.generation_config.eos_token_id
+    # model.generation_config.eos_token_id = model.generation_config.eos_token_id
 
-    print(f"model.config:\n{model.config}")
-    print(f"model.generation_config:\n{model.generation_config}")
+    logger.info(f"model.config:\n{model.config}")
+    logger.info(f"model.generation_config:\n{model.generation_config}")
 
     if not ddp and torch.cuda.device_count() > 1:
         # keeps Trainer from trying its own DataParallelism when more than 1 gpu is available
@@ -407,7 +424,7 @@ def train(args):
         lora_dropout=args.lora_dropout,
         bias="none",
         task_type="CAUSAL_LM",
-        target_modules = find_all_linear_names(model)
+        target_modules=find_all_linear_names(model)
     ))
 
     print_trainable_parameters(model)
@@ -415,7 +432,8 @@ def train(args):
     def tokenize(prompt, add_eos_token=True):
         result = tokenizer(
             prompt,
-            truncation=True, # Truncate to a maximum length specified with the argument max_length or to the maximum acceptable input length for the model if that argument is not provided.
+            truncation=True,
+            # Truncate to a maximum length specified with the argument max_length or to the maximum acceptable input length for the model if that argument is not provided.
             max_length=args.max_input_length,
             padding=False,
             return_tensors=None,
@@ -428,7 +446,7 @@ def train(args):
         ):
             result["input_ids"].append(tokenizer.eos_token_id)
             result["attention_mask"].append(1)
-        
+
         result["labels"] = result["input_ids"].copy()
 
         return result
@@ -441,7 +459,8 @@ def train(args):
             prompt = data_point["input"]
             tokenized_prompt = tokenize(prompt, add_eos_token=False)
             prompt_len = len(tokenized_prompt["input_ids"])
-            tokenized_prompt_label["labels"] = [IGNORE_INDEX] * prompt_len + tokenized_prompt_label["labels"][prompt_len:]  # could be sped up, probably
+            tokenized_prompt_label["labels"] = [IGNORE_INDEX] * prompt_len + tokenized_prompt_label["labels"][
+                                                                             prompt_len:]  # could be sped up, probably
 
         return tokenized_prompt_label
 
@@ -452,30 +471,32 @@ def train(args):
 
     dataset = Dataset.from_list(examples)
     dataset = dataset.shuffle().map(generate_and_tokenize_prompt)
-    print(f"dataset.column_names:\n{dataset.column_names}")
+    logger.debug(f"dataset.column_names:\n{dataset.column_names}")
 
     training_args = transformers.TrainingArguments(
-            #remove_unused_columns=False, #  Whether or not to automatically remove the columns unused by the model forward method
-            report_to='none', # default to ['tensorboard', 'wandb']
-            num_train_epochs=args.num_epochs,
-            per_device_train_batch_size=args.batch_size, # 8 for 65B
-            gradient_accumulation_steps=1,
-            #warmup_ratio=0.05,
-            #max_steps=100,
-            #save_steps = 10,
-            save_strategy="epoch",
-            save_total_limit=None, # If a value is passed, will limit the total amount of checkpoints. Deletes the older checkpoints in output_dir.
-            max_grad_norm=args.max_grad_norm,
-            learning_rate=args.lr,
-            fp16=True,
-            logging_steps=args.logging_steps,
-            output_dir=args.checkpoint_path_,
-            optim=args.optim,
-            lr_scheduler_type="constant",
-            group_by_length=args.group_by_length, #  Whether or not to group together samples of roughly the same length in the training dataset (to minimize padding applied and be more efficient). Only useful if applying dynamic padding.
-        )
+        # remove_unused_columns=False, #  Whether or not to automatically remove the columns unused by the model forward method
+        report_to='none',  # default to ['tensorboard', 'wandb']
+        num_train_epochs=args.num_epochs,
+        per_device_train_batch_size=args.batch_size,  # 8 for 65B
+        gradient_accumulation_steps=1,
+        # warmup_ratio=0.05,
+        # max_steps=100,
+        # save_steps = 10,
+        save_strategy="epoch",
+        save_total_limit=None,
+        # If a value is passed, will limit the total amount of checkpoints. Deletes the older checkpoints in output_dir.
+        max_grad_norm=args.max_grad_norm,
+        learning_rate=args.lr,
+        fp16=True,
+        logging_steps=args.logging_steps,
+        output_dir=args.checkpoint_path_,
+        optim=args.optim,
+        lr_scheduler_type="constant",
+        group_by_length=args.group_by_length,
+        # Whether or not to group together samples of roughly the same length in the training dataset (to minimize padding applied and be more efficient). Only useful if applying dynamic padding.
+    )
 
-    print(f"training_args:\n{training_args}")
+    logger.debug(f"training_args:\n{training_args}")
 
     data_collator = transformers.DataCollatorForSeq2Seq(
         tokenizer, pad_to_multiple_of=8, return_tensors="pt", padding=True
@@ -491,8 +512,8 @@ def train(args):
     model.config.use_cache = False  # silence the warnings. Please re-enable for inference!
 
     for name, module in model.named_modules():
-        #if isinstance(module, LoraLayer):
-            #module = module.to(torch.bfloat16)
+        # if isinstance(module, LoraLayer):
+        # module = module.to(torch.bfloat16)
 
         if 'norm' in name:
             module = module.to(torch.float32)
@@ -508,8 +529,6 @@ def train(args):
 
 
 def infer(args):
-
-
     model = AutoModelForCausalLM.from_pretrained(
         args.model_name_or_path,
         device_map="auto",
@@ -517,35 +536,35 @@ def infer(args):
         cache_dir=args.cache_dir,
         token=args.token,
         quantization_config=BitsAndBytesConfig(
-        load_in_4bit=True,
-        load_in_8bit=False,
-        #bnb_4bit_use_double_quant=True,
-        bnb_4bit_quant_type="nf4",
-        bnb_4bit_compute_dtype=torch.bfloat16,
-    )
+            load_in_4bit=True,
+            load_in_8bit=False,
+            # bnb_4bit_use_double_quant=True,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_compute_dtype=torch.bfloat16,
+        )
     )
 
     if args.checkpoint_name:
         model = PeftModel.from_pretrained(model, args.checkpoint_path_)
-        #model = model.merge_and_unload() # not necessary
+        # model = model.merge_and_unload() # not necessary
 
-    tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path,padding_side=args.padding_side, cache_dir=args.cache_dir, token=args.token)
+    tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path, padding_side=args.padding_side,
+                                              cache_dir=args.cache_dir, token=args.token)
 
     tokenizer.pad_token = tokenizer.eos_token
     tokenizer.padding_side = args.padding_side
 
-    model.config.torch_dtype =torch.bfloat16
+    model.config.torch_dtype = torch.bfloat16
     model.config.pad_token_id = model.config.eos_token_id
     model.generation_config.pad_token_id = model.generation_config.eos_token_id
 
     if isinstance(model.generation_config.eos_token_id, list):
-        model.generation_config.pad_token_id = model.generation_config.eos_token_id[0] # llama 3 128001
-        #model.generation_config.eos_token_id = model.generation_config.eos_token_id[0]
+        model.generation_config.pad_token_id = model.generation_config.eos_token_id[0]  # llama 3 128001
+        # model.generation_config.eos_token_id = model.generation_config.eos_token_id[0]
     else:
-        model.generation_config.pad_token_id = model.generation_config.eos_token_id # llama 3 128001
+        model.generation_config.pad_token_id = model.generation_config.eos_token_id  # llama 3 128001
 
     model.eval()
-
 
     if args.rj:
         examples = load_rj_data(args)
@@ -561,7 +580,8 @@ def infer(args):
         rng = slice(start_idx, start_idx + args.batch_size)
 
         # padding=True or 'longest': Pad to the longest sequence in the batch (or no padding if only a single sequence if provided).
-        enc = tokenizer([example['input'] for example in examples[rng]], padding=True, truncation=True, max_length=args.max_input_length, return_tensors='pt')
+        enc = tokenizer([example['input'] for example in examples[rng]], padding=True, truncation=True,
+                        max_length=args.max_input_length, return_tensors='pt')
 
         enc = {k: v.to(device) for k, v in enc.items()}
 
@@ -575,13 +595,13 @@ def infer(args):
         predictions = tokenizer.batch_decode(predictions, skip_special_tokens=True, clean_up_tokenization_spaces=True)
 
         for idx, example in enumerate(examples[rng]):
-            #qid, rank, pid  = example["example_id"].split("#")
+            # qid, rank, pid  = example["example_id"].split("#")
             prediction = predictions[idx].split(args.prompter.spliter)[-1].strip()
             example["prediction"] = args.prompter.parser(prediction)
 
-            #if prediction not in [POS_LABEL, NEG_LABEL]:
+            # if prediction not in [POS_LABEL, NEG_LABEL]:
             #   prediction = text_parser(prediction)
-            #example["prediction"] = prediction
+            # example["prediction"] = prediction
 
     with open(f"{args.output_dir_}", 'w') as rj_w:
         for idx, example in enumerate(examples):
@@ -593,11 +613,12 @@ def infer(args):
 
 
 if __name__ == '__main__':
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--infer", action='store_true')
     parser.add_argument("--rj", action='store_true')
 
-    parser.add_argument("--prompt", type=str) # binary, ikat_digit
+    parser.add_argument("--prompt", type=str)  # binary, ikat_digit
 
     parser.add_argument("--token", type=str)
     parser.add_argument("--cache_dir", type=str)
@@ -637,7 +658,7 @@ if __name__ == '__main__':
     parser.add_argument("--logging_steps", type=int, default=10)
 
     parser.add_argument("--lora_r", type=int, default=64)  # [64, 16, 8]
-    parser.add_argument("--lora_alpha", type=int, default=16) # [32, 16]
+    parser.add_argument("--lora_alpha", type=int, default=16)  # [32, 16]
     parser.add_argument("--lora_dropout", type=float, default=0.1)
 
     parser.add_argument("--num_demon_per_class", type=int, default=1)
@@ -663,7 +684,7 @@ if __name__ == '__main__':
         if args.checkpoint_name:
             args.checkpoint_path_ = f"{args.checkpoint_path}/{args.checkpoint_name}/"
             if "/" in args.checkpoint_name:
-                args.checkpoint_name=args.checkpoint_name.replace("/","-")
+                args.checkpoint_name = args.checkpoint_name.replace("/", "-")
             if args.rj:
                 args.setup = f"{args.qrels_name}.{args.query_type}-{args.base_model}-ckpt-{args.checkpoint_name}"
             else:
@@ -675,12 +696,11 @@ if __name__ == '__main__':
             elif args.query_demon_path is not None:
                 dataset_name_demon = args.query_demon_path.split("/")[-1].split(".")[0]
                 retriever_demon = "-".join(args.run_demon_path.split("/")[-1].split(".")[1].split("-")[1:])
-                setup_demon=f"{dataset_name_demon}.{retriever_demon}-demon{args.num_demon_per_class}"
+                setup_demon = f"{dataset_name_demon}.{retriever_demon}-demon{args.num_demon_per_class}"
 
                 args.setup = f"{args.dataset_name}.{args.retriever}.{args.query_type}-{args.base_model}-icl-{setup_demon}"
             else:
                 args.setup = f"{args.dataset_name}.{args.retriever}.{args.query_type}-{args.base_model}"
-
 
         if not os.path.exists(args.output_dir):
             os.makedirs(args.output_dir)
@@ -700,8 +720,9 @@ if __name__ == '__main__':
     replicability(seed=args.random_seed)
 
     if args.infer is True:
+        logger.debug('************************* Debugging: Inference *************************')
         infer(args)
     else:
+        logger.debug('************************* Debugging: Train *************************')
+        logger.debug(f'args: \n{args}')
         train(args)
-
-
