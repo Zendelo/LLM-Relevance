@@ -343,7 +343,7 @@ def load_rj_data(args) -> list[dict[str, str]]:
             else:
                 count[example["output"]] += 1
 
-            logger.debug("Prompt input:\n", example["input"], "\n")
+            logger.debug(f'Prompt input {count[example["output"]]}:\n{example["input"]}')
             examples.append(example)
 
     logger.info(f"Number of examples: {count}")
