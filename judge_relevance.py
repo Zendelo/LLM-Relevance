@@ -343,11 +343,10 @@ def load_rj_data(args) -> list[dict[str, str]]:
             else:
                 count[example["output"]] += 1
 
-            logger.info(example["input"], "\n")
-
+            logger.debug("Prompt input:\n", example["input"], "\n")
             examples.append(example)
 
-    logger.info(count)
+    logger.info(f"Number of examples: {count}")
     return examples
 
 
@@ -662,6 +661,8 @@ if __name__ == '__main__':
     parser.add_argument("--num_epochs", type=int, default=5)
     parser.add_argument("--per_device_train_batch_size", type=int, default=32)
     parser.add_argument("--logging_steps", type=int, default=10)
+    parser.add_argument("--log_file", type=str, default="judge_relevance.log")
+    parser.add_argument("--log_level", type=str, default="INFO")
 
     parser.add_argument("--lora_r", type=int, default=64)  # [64, 16, 8]
     parser.add_argument("--lora_alpha", type=int, default=16)  # [32, 16]
@@ -679,8 +680,8 @@ if __name__ == '__main__':
     args.qrels_name = ".".join(args.qrels_path.split("/")[-1].split(".")[0:-1])
 
     args.prompter = Prompter(args)
-
-    logger = init_logger(level=logging.DEBUG, log_file='judge_relevance.log')
+    log_level = getattr(logging, args.log_level.upper())
+    logger = init_logger(level=log_level, log_file=args.log_file)
     logger.debug(f"Global args: {args}")
 
     if not args.rj:
