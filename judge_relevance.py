@@ -682,7 +682,7 @@ if __name__ == '__main__':
     args.prompter = Prompter(args)
     log_level = getattr(logging, args.log_level.upper())
     logger = init_logger(level=log_level, log_file=args.log_file)
-    logger.debug(f"Global args: {args}")
+    # logger.debug(f"Global args: {args}")
 
     if not args.rj:
         args.retriever = "-".join(args.run_path.split("/")[-1].split(".")[1].split("-")[1:])
@@ -734,5 +734,5 @@ if __name__ == '__main__':
         infer(args)
     else:
         logger.debug('************************* Debugging: Train *************************')
-        logger.debug(f'args: \n{args}')
+        # logger.debug(f'args: \n{args}')
         train(args)
