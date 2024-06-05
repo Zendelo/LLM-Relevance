@@ -421,7 +421,7 @@ def train(args):
         setattr(model, 'is_parallelizable', True)
 
     model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=True)
-    model.gradient_checkpointing_enable()  # reduce the memeory, but increase the training time
+    model.gradient_checkpointing_enable()  # reduce the memory, but increase the training time
 
     model = get_peft_model(model, LoraConfig(
         r=args.lora_r,
@@ -482,7 +482,7 @@ def train(args):
     dataset = Dataset.from_list(examples)
     dataset = dataset.shuffle().map(generate_and_tokenize_prompt)
     logger.info(f"dataset.column_names:\n{dataset.column_names}")
-    logger.debug(f"dataset:\n{dataset}")
+    logger.debug(f"dataset first 5 rows:\n{dataset[:5]}")
 
     training_args = transformers.TrainingArguments(
         # remove_unused_columns=False, #  Whether or not to automatically remove the columns unused by the model forward method
