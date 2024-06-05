@@ -451,6 +451,11 @@ def train(args):
         ):
             result["input_ids"].append(tokenizer.eos_token_id)
             result["attention_mask"].append(1)
+        else:
+            logger.debug(f"input_ids[-1]: {result['input_ids'][-1]}")
+            logger.debug(f"len(input_ids): {len(result['input_ids'])}")
+            logger.debug(f"max_input_length: {args.max_input_length}")
+            logger.debug(f"add_eos_token: {add_eos_token}")
 
         result["labels"] = result["input_ids"].copy()
 
@@ -476,7 +481,8 @@ def train(args):
 
     dataset = Dataset.from_list(examples)
     dataset = dataset.shuffle().map(generate_and_tokenize_prompt)
-    logger.debug(f"dataset.column_names:\n{dataset.column_names}")
+    logger.info(f"dataset.column_names:\n{dataset.column_names}")
+    logger.debug(f"dataset:\n{dataset}")
 
     training_args = transformers.TrainingArguments(
         # remove_unused_columns=False, #  Whether or not to automatically remove the columns unused by the model forward method
@@ -716,7 +722,6 @@ if __name__ == '__main__':
             os.makedirs(args.output_dir)
 
         args.output_dir_ = f"{args.output_dir}/{args.setup}"
-
 
     else:
         # training mode
