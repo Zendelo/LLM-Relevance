@@ -685,16 +685,14 @@ if __name__ == '__main__':
     args.query_type = "-".join(args.query_path.split("/")[-1].split(".")[1].split("-")[1:])
     args.qrels_name = ".".join(args.qrels_path.split("/")[-1].split(".")[0:-1])
 
-    args.prompter = Prompter(args)
     log_level = getattr(logging, args.log_level.upper())
     logger = init_logger(level=log_level, log_file=args.log_file)
     # logger.debug(f"Global args: {args}")
-
+    args.prompter = Prompter(args)
     if not args.rj:
         args.retriever = "-".join(args.run_path.split("/")[-1].split(".")[1].split("-")[1:])
 
     args.base_model = args.model_name_or_path.split("/")[-1]
-
     if args.infer is True:
         # inference mode with a fine-tuned checkpoint
         if args.checkpoint_name:
