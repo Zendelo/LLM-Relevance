@@ -568,13 +568,9 @@ def train(args):
         # module = module.to(torch.bfloat16)
 
         if 'norm' in name:
-            logger.debug(f"module name: {name}")
-            logger.debug(f"module: {module}")
             module = module.to(torch.float32)
 
         if 'lm_head' in name or 'embed_tokens' in name:
-            logger.debug(f"module name: {name}")
-            logger.debug(f"module: {module}")
             if hasattr(module, 'weight'):
                 if module.weight.dtype == torch.float32:
                     module = module.to(torch.bfloat16)
@@ -673,6 +669,8 @@ def infer(args):
 
 
 if __name__ == '__main__':
+    os.environ["OPENMP_NUM_THREADS"] = "1"
+    torch.set_num_threads(1)
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--infer", action='store_true')
@@ -787,5 +785,4 @@ if __name__ == '__main__':
     else:
         logger.debug('************************* Debugging: Train *************************')
         # logger.debug(f'args: \n{args}')
-        torch.set_num_threads(4)
         train(args)
