@@ -787,4 +787,5 @@ if __name__ == '__main__':
     else:
         logger.debug('************************* Debugging: Train *************************')
         # logger.debug(f'args: \n{args}')
+        torch.set_num_threads(4)
         train(args)
