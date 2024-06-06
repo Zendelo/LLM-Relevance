@@ -19,7 +19,8 @@ from utils import replicability
 
 # A bool that controls whether TensorFloat-32 tensor cores may be used in matrix multiplications on Ampere or newer GPUs.
 torch.backends.cuda.matmul.allow_tf32 = True
-IGNORE_INDEX = -100
+# special token to ignore in the loss computation
+IGNORE_INDEX = -100  # The default setting in CrossEntropyLoss
 
 
 def init_logger(level=logging.INFO, log_file=None):
@@ -562,6 +563,8 @@ def train(args):
     model.config.use_cache = False  # silence the warnings. Please re-enable for inference!
 
     for name, module in model.named_modules():
+        logger.debug(f"module name: {name}")
+        logger.debug(f"module: {module}")
         # if isinstance(module, LoraLayer):
         # module = module.to(torch.bfloat16)
 
@@ -604,6 +607,7 @@ def infer(args):
     tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path, padding_side=args.padding_side,
                                               cache_dir=args.cache_dir, token=args.token)
 
+    # TODO: consider using bos_token_id for padding on the left
     tokenizer.pad_token = tokenizer.eos_token
     tokenizer.padding_side = args.padding_side
 
