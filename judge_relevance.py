@@ -563,15 +563,18 @@ def train(args):
     model.config.use_cache = False  # silence the warnings. Please re-enable for inference!
 
     for name, module in model.named_modules():
-        logger.debug(f"module name: {name}")
-        logger.debug(f"module: {module}")
+
         # if isinstance(module, LoraLayer):
         # module = module.to(torch.bfloat16)
 
         if 'norm' in name:
+            logger.debug(f"module name: {name}")
+            logger.debug(f"module: {module}")
             module = module.to(torch.float32)
 
         if 'lm_head' in name or 'embed_tokens' in name:
+            logger.debug(f"module name: {name}")
+            logger.debug(f"module: {module}")
             if hasattr(module, 'weight'):
                 if module.weight.dtype == torch.float32:
                     module = module.to(torch.bfloat16)
