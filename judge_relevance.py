@@ -332,7 +332,7 @@ def load_rj_data(args) -> list[dict[str, str]]:
 
     examples = []
     count = {}
-
+    counter = 0
     for qid, pid2rel in qrels.items():
         for pid, rel in pid2rel.items():
             example = {}
@@ -378,9 +378,10 @@ def load_rj_data(args) -> list[dict[str, str]]:
                 count[example["output"]] = 1
             else:
                 count[example["output"]] += 1
-
-            logger.debug(f'Prompt input {count[example["output"]]}:\n{example["input"]}')
-            logger.debug(f'Prompt output {count[example["output"]]}:\n{example["output"]}')
+            if counter % 500 == 0:
+                logger.debug(f'Prompt input {count[example["output"]]}:\n{example["input"]}')
+                logger.debug(f'Prompt output {count[example["output"]]}:\n{example["output"]}')
+            counter += 1
             examples.append(example)
 
     logger.info(f"Number of examples: {count}")
