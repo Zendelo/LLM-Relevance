@@ -501,9 +501,7 @@ def train(args):
 
     def generate_and_tokenize_prompt(data_point):
         prompt_label = " ".join([data_point["input"], data_point["output"]])
-        logger.debug(f"prompt_label: {prompt_label}")
         tokenized_prompt_label = tokenize(prompt_label)
-        logger.debug(f"tokenized_prompt_label: {tokenized_prompt_label}")
 
         if not args.train_on_inputs:
             prompt = data_point["input"]
