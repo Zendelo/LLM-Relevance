@@ -378,9 +378,9 @@ def load_rj_data(args) -> list[dict[str, str]]:
                 count[example["output"]] = 1
             else:
                 count[example["output"]] += 1
-            if counter % 500 == 0:
-                logger.debug(f'Prompt input {count[example["output"]]}:\n{example["input"]}')
-                logger.debug(f'Prompt output {count[example["output"]]}:\n{example["output"]}')
+            if counter % 1000 == 0:
+                logger.debug(f'Prompt input {counter}:\n{example["input"]}')
+                logger.debug(f'Prompt output {counter}:\n{example["output"]}')
             counter += 1
             examples.append(example)
 
