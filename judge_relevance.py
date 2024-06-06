@@ -301,6 +301,7 @@ def load_qpp_data(args):
 
 
 def load_rj_data(args) -> list[dict[str, str]]:
+    # TODO: Add support for other datasets
     query = {}
     query_reader = open(args.query_path, 'r').readlines()
     for line in query_reader:
@@ -322,6 +323,9 @@ def load_rj_data(args) -> list[dict[str, str]]:
         for line in corpus_reader:
             pid, passage_text = line.split('\t')
             corpus[pid] = passage_text.replace("\t", "").replace("\n", "").replace("\r", "")
+    elif "llmjudge" == args.dataset_class:
+        # TODO: Add support for other datasets
+        pass
     else:
         raise Exception
 
@@ -369,6 +373,9 @@ def load_rj_data(args) -> list[dict[str, str]]:
                         example["output"] = args.prompter.neg_label
                         example["example_id"] = f"{qid}#neg#{pid}"
 
+            elif "llmjudge" == args.dataset_class:
+                # TODO: Add support for other datasets
+                pass
             if example["output"] not in count:
                 count[example["output"]] = 1
             else:
@@ -412,11 +419,13 @@ def find_all_linear_names(model):
 def train(args):
     device_map = "auto"
     world_size = int(os.environ.get("WORLD_SIZE", 1))
-    ddp = world_size != 1
+    logger.debug(f"world_size: {world_size}")
+    ddp = world_size != 1  # DistributedDataParallel
 
     if ddp:
         device_map = {"": int(os.environ.get("LOCAL_RANK") or 0)}
-        gradient_accumulation_steps = gradient_accumulation_steps // world_size
+        # gradient_accumulation_steps = gradient_accumulation_steps // world_size
+        logger.debug(f"device_map: {device_map}")
 
     model = AutoModelForCausalLM.from_pretrained(
         args.model_name_or_path,
@@ -454,34 +463,45 @@ def train(args):
     model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=True)
     model.gradient_checkpointing_enable()  # reduce the memory, but increase the training time
 
-    model = get_peft_model(model, LoraConfig(
+    # Configure PEFT LoRA adapter
+    model_lora_config = LoraConfig(
         r=args.lora_r,
         lora_alpha=args.lora_alpha,
         lora_dropout=args.lora_dropout,
         bias="none",
         task_type="CAUSAL_LM",
         target_modules=find_all_linear_names(model)
-    ))
+    )
 
+    model = get_peft_model(model, model_lora_config)
+    # prints the number of trainable parameters in the LoRA model
     print_trainable_parameters(model)
 
     def tokenize(prompt, add_eos_token=True):
         result = tokenizer(
             prompt,
             truncation=True,
-            # Truncate to a maximum length specified with the argument max_length or to the maximum acceptable input length for the model if that argument is not provided.
+            # Truncate to a maximum length specified with the argument max_length or
+            # to the maximum acceptable input length for the model if that argument is not provided.
             max_length=args.max_input_length,
             padding=False,
             return_tensors=None,
         )
+        logger.debug(f"input_ids[-1]: {result['input_ids'][-1]}")
+        logger.debug(f"len(input_ids): {len(result['input_ids'])}")
+        logger.debug(f"max_input_length: {args.max_input_length}")
+        logger.debug(f"add_eos_token: {add_eos_token}")
 
         if (
                 result["input_ids"][-1] != tokenizer.eos_token_id
                 and len(result["input_ids"]) < args.max_input_length
                 and add_eos_token
         ):
+            logger.debug('Adding eos token')
             result["input_ids"].append(tokenizer.eos_token_id)
             result["attention_mask"].append(1)
+            logger.debug(result)
+            logger.debug(f"input_ids[-1]: {result['input_ids'][-1]}")
         else:
             logger.debug(f"input_ids[-1]: {result['input_ids'][-1]}")
             logger.debug(f"len(input_ids): {len(result['input_ids'])}")
@@ -494,7 +514,9 @@ def train(args):
 
     def generate_and_tokenize_prompt(data_point):
         prompt_label = " ".join([data_point["input"], data_point["output"]])
+        logger.debug(f"prompt_label: {prompt_label}")
         tokenized_prompt_label = tokenize(prompt_label)
+        logger.debug(f"tokenized_prompt_label: {tokenized_prompt_label}")
 
         if not args.train_on_inputs:
             prompt = data_point["input"]
@@ -564,8 +586,10 @@ def train(args):
             if hasattr(module, 'weight'):
                 if module.weight.dtype == torch.float32:
                     module = module.to(torch.bfloat16)
-
+    logger.info('Starting training')
     trainer.train()
+    logger.info('Finished training')
+    logger.info(f"Saving model to {args.checkpoint_path_}")
     model.save_pretrained(args.checkpoint_path_)
     return None
 
