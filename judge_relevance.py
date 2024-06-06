@@ -95,19 +95,17 @@ class Prompter:
             self.parser = parser_digit
 
         elif self.args.prompt == "llmjudge":
-            self.template = ("You are a search quality rater evaluating the relevance of web pages.\n"
-                             "Given the persona of the user, user query, and a web page, you must provide a "
-                             "score on an integer scale of 0 to 4 to indicate to what extent the given document "
-                             "meets the information needs of the user.\n"
-                             "The scores have the following meanings:\n\n"
-                             "0: fails to meet\n"
-                             "1: slightly meets\n"
-                             "2: moderately meets\n"
-                             "3: highly meets\n"
-                             "4: fully meets\n\n"
-                             "Query: {query}\n"
-                             "Passage: {passage}\n"
-                             "Score:")
+            self.template = ('''You are a search quality rater evaluating the relevance of web pages.
+                             Given the user query, and a web page, you must provide a score on an integer scale of 0 to
+                             3 to indicate to what extent the given document meets the information needs of the user.
+                             The scores have the following meanings:
+                             3 = Perfectly relevant: The passage is dedicated to the query and contains the exact answer.
+                             2 = Highly relevant: The passage has some answer for the query, but the answer may be a bit unclear, or hidden amongst extraneous information.
+                             1 = Related: The passage seems related to the query but does not answer it.
+                             0 = Irrelevant: The passage has nothing to do with the query
+                             Query: {query}
+                             Passage: {passage}
+                             Score:''')
             self.spliter = "Score:"
             self.labels = ["0", "1", "2", "3"]
             self.parser = parser_digit
@@ -488,26 +486,14 @@ def train(args):
             padding=False,
             return_tensors=None,
         )
-        logger.debug(f"input_ids[-1]: {result['input_ids'][-1]}")
-        logger.debug(f"len(input_ids): {len(result['input_ids'])}")
-        logger.debug(f"max_input_length: {args.max_input_length}")
-        logger.debug(f"add_eos_token: {add_eos_token}")
 
         if (
                 result["input_ids"][-1] != tokenizer.eos_token_id
                 and len(result["input_ids"]) < args.max_input_length
                 and add_eos_token
         ):
-            logger.debug('Adding eos token')
             result["input_ids"].append(tokenizer.eos_token_id)
             result["attention_mask"].append(1)
-            logger.debug(result)
-            logger.debug(f"input_ids[-1]: {result['input_ids'][-1]}")
-        else:
-            logger.debug(f"input_ids[-1]: {result['input_ids'][-1]}")
-            logger.debug(f"len(input_ids): {len(result['input_ids'])}")
-            logger.debug(f"max_input_length: {args.max_input_length}")
-            logger.debug(f"add_eos_token: {add_eos_token}")
 
         result["labels"] = result["input_ids"].copy()
 
@@ -536,7 +522,7 @@ def train(args):
     dataset = Dataset.from_list(examples)
     dataset = dataset.shuffle().map(generate_and_tokenize_prompt)
     logger.info(f"dataset.column_names:\n{dataset.column_names}")
-    logger.debug(f"dataset first 2 rows:\n{dataset[:2]}")
+    logger.debug(f"dataset first 3 rows:\n{dataset[:2]}")
 
     training_args = transformers.TrainingArguments(
         # remove_unused_columns=False, #  Whether or not to automatically remove the columns unused by the model forward method
@@ -587,6 +573,7 @@ def train(args):
             if hasattr(module, 'weight'):
                 if module.weight.dtype == torch.float32:
                     module = module.to(torch.bfloat16)
+
     logger.info('Starting training')
     trainer.train()
     logger.info('Finished training')
