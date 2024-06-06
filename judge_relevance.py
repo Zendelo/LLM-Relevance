@@ -76,9 +76,40 @@ class Prompter:
             self.parser = parser_binary
 
         elif self.args.prompt == "ikat":
-            self.template = "You are a search quality rater evaluating the relevance of web pages.\nGiven the persona of the user, user query, and a web page, you must provide a score on an integer scale of 0 to 4 to indicate to what extent the given document meets the information needs of the user.\nThe scores have the following meanings:\n\n0: fails to meet\n1: slightly meets\n2: moderately meets\n3: highly meets\n4: fully meets\n\nUser persona: {ptkb}\nQuery: {query}\nPassage: {passage}\nScore:"
+            self.template = ("You are a search quality rater evaluating the relevance of web pages.\n"
+                             "Given the persona of the user, user query, and a web page, you must provide a score on "
+                             "an integer scale of 0 to 4 to indicate to what extent the given document meets the "
+                             "information needs of the user.\n"
+                             "The scores have the following meanings:\n\n"
+                             "0: fails to meet\n"
+                             "1: slightly meets\n"
+                             "2: moderately meets\n"
+                             "3: highly meets\n"
+                             "4: fully meets\n\n"
+                             "User persona: {ptkb}\n"
+                             "Query: {query}\n"
+                             "Passage: {passage}\n"
+                             "Score:")
             self.spliter = "Score:"
             self.labels = ["0", "1", "2", "3", "4"]
+            self.parser = parser_digit
+
+        elif self.args.prompt == "llmjudge":
+            self.template = ("You are a search quality rater evaluating the relevance of web pages.\n"
+                             "Given the persona of the user, user query, and a web page, you must provide a "
+                             "score on an integer scale of 0 to 4 to indicate to what extent the given document "
+                             "meets the information needs of the user.\n"
+                             "The scores have the following meanings:\n\n"
+                             "0: fails to meet\n"
+                             "1: slightly meets\n"
+                             "2: moderately meets\n"
+                             "3: highly meets\n"
+                             "4: fully meets\n\n"
+                             "Query: {query}\n"
+                             "Passage: {passage}\n"
+                             "Score:")
+            self.spliter = "Score:"
+            self.labels = ["0", "1", "2", "3"]
             self.parser = parser_digit
 
         else:
@@ -482,7 +513,7 @@ def train(args):
     dataset = Dataset.from_list(examples)
     dataset = dataset.shuffle().map(generate_and_tokenize_prompt)
     logger.info(f"dataset.column_names:\n{dataset.column_names}")
-    logger.debug(f"dataset first 5 rows:\n{dataset[:5]}")
+    logger.debug(f"dataset first 2 rows:\n{dataset[:2]}")
 
     training_args = transformers.TrainingArguments(
         # remove_unused_columns=False, #  Whether or not to automatically remove the columns unused by the model forward method
@@ -655,7 +686,7 @@ if __name__ == '__main__':
     parser.add_argument("--truncation_side", type=str, default='left')
     parser.add_argument("--padding_side", type=str, default='left')
     parser.add_argument("--max_char_len", type=int, default=1400)
-    parser.add_argument("--max_input_length", type=int, default=2048)
+    parser.add_argument("--max_input_length", type=int, default=8192)  # llama2 max is 2048; llama3 max is 8192
     parser.add_argument("--max_new_tokens", type=int, default=4)
 
     parser.add_argument("--random_seed", type=int, default=42)
