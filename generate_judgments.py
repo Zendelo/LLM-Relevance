@@ -39,7 +39,7 @@ def load_model_infer(model_id_path, cache_dir, hf_token, device_map):
     quantization_config = BitsAndBytesConfig(
         load_in_4bit=True,
         load_in_8bit=False,
-        # bnb_4bit_use_double_quant=True,
+        bnb_4bit_use_double_quant=True,
         bnb_4bit_quant_type="nf4",
         bnb_4bit_compute_dtype=torch.bfloat16,
         # llm_int8_has_fp16_weight=False,
@@ -152,8 +152,8 @@ if __name__ == '__main__':
     logger.info(f'Started logging...')
 
     # model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
-    model_id = "meta-llama/Meta-Llama-3-70B-Instruct"
-    # model_id = "meta-llama/Meta-Llama-3-8B"
+    # model_id = "meta-llama/Meta-Llama-3-70B-Instruct"
+    model_id = "meta-llama/Meta-Llama-3-8B"
     cache_dir = os.getenv("HF_HOME")
     hf_token = os.getenv("HF_TOKEN")
     lora_r = 64
@@ -165,7 +165,7 @@ if __name__ == '__main__':
     device_map = "auto"
     max_new_tokens = 256
     batch_size = 32
-    output_file = 'raw_output_run_70_{}.tsv'
+    output_file = 'raw_output_run_llama8b_{}.tsv'
 
     tokenizer, model = load_model_infer(model_id, cache_dir, hf_token, device_map)
 
