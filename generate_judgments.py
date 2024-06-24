@@ -152,7 +152,7 @@ if __name__ == '__main__':
 
     model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
     # model_id = "meta-llama/Meta-Llama-3-8B"
-    cache_dir = "/research/remote/petabyte/users/oleg/.cache/huggingface/hub"
+    cache_dir = os.getenv("HF_HOME")
     hf_token = os.getenv("HF_TOKEN")
     lora_r = 64
     lora_alpha = 16
@@ -173,7 +173,7 @@ if __name__ == '__main__':
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Load the validation prompts
-    val_prompts_df = pd.read_csv('val_prompts.tsv', sep='\t')
+    val_prompts_df = pd.read_csv('data/val_prompts.tsv', sep='\t')
 
     _df = val_prompts_df[['qid', 'docid', 'prompt']].reset_index(drop=True)
     # save output file as a template string
