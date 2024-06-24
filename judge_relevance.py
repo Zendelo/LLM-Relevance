@@ -23,7 +23,7 @@ torch.backends.cuda.matmul.allow_tf32 = True
 IGNORE_INDEX = -100  # The default setting in CrossEntropyLoss
 
 
-def init_logger(level=logging.INFO, log_file=None):
+def init_logger(level=logging.DEBUG, log_file=None):
     logger = logging.getLogger()
     logger.setLevel(level)
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
@@ -53,13 +53,14 @@ def extract_first_digit(text):
     return "0"
 
 
-def parser_digit(text):
-    if text in ["0", "1", "2", "3", "4"]:
+def parser_digit(text, scale=4):
+    ranks = {str(i) for i in range(scale)}
+    if text in ranks:
         return text
     else:
-        logger.info(f"Parsing:***********\nOriginal text:\n{text}\n")
+        logger.warn(f"Parsing:***********\nOriginal text:\n{text}\n")
         text_ = extract_first_digit(text)
-        logger.info(f"Parsed text:\n{text_}\n***********\n")
+        logger.warn(f"Parsed text:\n{text_}\n***********\n")
     return text_
 
 
@@ -576,7 +577,7 @@ def train(args):
                     module = module.to(torch.bfloat16)
 
     logger.info('Starting training')
-    trainer.train()
+    trainer.train(resume_from_checkpoint=True)
     logger.info('Finished training')
     logger.info(f"Saving model to {args.checkpoint_path_}")
     model.save_pretrained(args.checkpoint_path_)
