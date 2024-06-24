@@ -6,7 +6,6 @@ import pandas as pd
 import torch
 import tqdm
 import transformers
-from tqdm import tqdm
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 
 
