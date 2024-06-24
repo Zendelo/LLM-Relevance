@@ -38,10 +38,11 @@ def smart_tokenizer_and_embedding_resize(
 def load_model_infer(model_id_path, cache_dir, hf_token, device_map):
     quantization_config = BitsAndBytesConfig(
         load_in_4bit=True,
-        bnb_4bit_use_double_quant=True,
+        load_in_8bit=False,
+        # bnb_4bit_use_double_quant=True,
         bnb_4bit_quant_type="nf4",
         bnb_4bit_compute_dtype=torch.bfloat16,
-        llm_int8_has_fp16_weight=False,
+        # llm_int8_has_fp16_weight=False,
     )
 
     model = AutoModelForCausalLM.from_pretrained(
