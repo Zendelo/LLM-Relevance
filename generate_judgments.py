@@ -54,7 +54,7 @@ def load_model_infer(model_id_path, cache_dir, hf_token, device_map):
 
     # padding side is left for decoder models
     tokenizer = AutoTokenizer.from_pretrained(model_id_path, cache_dir=cache_dir, padding_side='left')
-    # tokenizer.pad_token = tokenizer.eos_token
+    tokenizer.pad_token = tokenizer.eos_token
     # tokenizer.padding_side = args.padding_side
 
     if tokenizer.pad_token is None:
@@ -76,7 +76,8 @@ def load_model_infer(model_id_path, cache_dir, hf_token, device_map):
     logger.debug(f"tokenizer special tokens ids: {dict(zip(tokenizer.all_special_tokens, tokenizer.all_special_ids))}")
 
     model.config.pad_token_id = tokenizer.pad_token_id
-    model.generation_config.pad_token_id = model.generation_config.pad_token_id
+    # set the pad_token_id in the generation config to avoid warnings, specifically for LLAMA3 instruction
+    model.generation_config.pad_token_id = tokenizer.encode('<|end_of_text|>')[1]
 
     assert model.config.vocab_size == len(
         tokenizer), f"Vocab size mismatch: {model.config.vocab_size} != {len(tokenizer)}"
@@ -150,6 +151,7 @@ if __name__ == '__main__':
     logger.info(f'Started logging...')
 
     model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
+    # model_id = "meta-llama/Meta-Llama-3-70B-Instruct"
     # model_id = "meta-llama/Meta-Llama-3-8B"
     cache_dir = os.getenv("HF_HOME")
     hf_token = os.getenv("HF_TOKEN")
@@ -160,12 +162,10 @@ if __name__ == '__main__':
     # max_input_length = 4096
     max_input_length = 2048
     device_map = "auto"
+    max_new_tokens = 128
+    batch_size = 32
 
     tokenizer, model = load_model_infer(model_id, cache_dir, hf_token, device_map)
-
-    max_new_tokens = 32
-    max_input_length = 1024
-    batch_size = 8
 
     model.eval()
 
