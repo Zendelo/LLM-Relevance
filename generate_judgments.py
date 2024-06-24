@@ -162,8 +162,9 @@ if __name__ == '__main__':
     # max_input_length = 4096
     max_input_length = 2048
     device_map = "auto"
-    max_new_tokens = 128
+    max_new_tokens = 256
     batch_size = 32
+    output_file = 'raw_output_run_1_{}.tsv'
 
     tokenizer, model = load_model_infer(model_id, cache_dir, hf_token, device_map)
 
@@ -176,7 +177,7 @@ if __name__ == '__main__':
 
     _df = val_prompts_df[['qid', 'docid', 'prompt']].reset_index(drop=True)
     # save output file as a template string
-    output_file = 'raw_output_run_1_{}.tsv'
+
     # Attempt to generate predictions up to 10 times
     for i in range(10):
         output, failed_batches = generate_predictions(_df, batch_size, max_new_tokens, max_input_length)
