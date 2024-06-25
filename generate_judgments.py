@@ -95,6 +95,7 @@ def generate_predictions(_df, batch_size, max_new_tokens, max_input_length):
 
     it = range(0, len(_df), batch_size)
     failed_batches = []
+    batch_counter = 0
 
     # iterate over the examples in batches
     for start_idx in tqdm.tqdm(it):
@@ -131,6 +132,9 @@ def generate_predictions(_df, batch_size, max_new_tokens, max_input_length):
             for i, docid, prompt in examples.itertuples(index=True):
                 prediction = predictions[i].split('assistant')[-1].strip()
                 output.append({'docid': docid, 'prediction': prediction})
+        if batch_counter % 100 == 0:
+            logger.debug(f'Finished batch # {batch_counter}, last output:')
+            logger.debug(output[-1])
     return output, failed_batches
 
 
