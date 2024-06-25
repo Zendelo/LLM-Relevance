@@ -152,8 +152,8 @@ if __name__ == '__main__':
     logger.info(f'Started logging...')
 
     # model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
-    # model_id = "meta-llama/Meta-Llama-3-70B-Instruct"
-    model_id = "meta-llama/Meta-Llama-3-8B"
+    model_id = "meta-llama/Meta-Llama-3-70B-Instruct"
+    # model_id = "meta-llama/Meta-Llama-3-8B"
     cache_dir = os.getenv("HF_HOME")
     hf_token = os.getenv("HF_TOKEN")
     lora_r = 64
@@ -165,7 +165,8 @@ if __name__ == '__main__':
     device_map = "auto"
     max_new_tokens = 256
     batch_size = 32
-    output_file = 'raw_output_run_llama8b_{}.tsv'
+    # output_file = 'raw_output_run_llama8b-inst_{}.tsv'
+    output_file = 'raw_output_run_llama70b_{}.tsv'
 
     tokenizer, model = load_model_infer(model_id, cache_dir, hf_token, device_map)
 
