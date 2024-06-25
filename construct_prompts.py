@@ -1,3 +1,8 @@
+import argparse
+import json
+import logging
+import sys
+
 import pandas as pd
 from bs4 import BeautifulSoup
 from nltk.corpus import stopwords
@@ -86,8 +91,7 @@ def read_docs(docs_file):
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Construct prompts for the model')
-    parser.add_argument('--sys_instruction_prompts', '-sip', type=str, default='data',
-                        help='Path to the prompts JSON file')
+    parser.add_argument('sys_instruction_prompts', type=str, help='Path to the prompts JSON file')
     parser.add_argument('--prompt_key', '-pk', type=str, default='1',
                         help='Key to the prompts in the JSON file')
     parser.add_argument('--queries', '-q', type=str, help='Path to the queries file')
@@ -96,7 +100,7 @@ def parse_arguments():
     parser.add_argument('--qrel', '-qr', type=str, default='data/llm4eval_dev_qrel.txt',
                         help='Path to the qrel file')
     parser.add_argument('--output', type=str, default='prompts.tsv', help='Path to the output TSV file')
-    parser.add_argument('--instruct_format', '-if', type=store_false, default=True,
+    parser.add_argument('--instruct_format', '-if', action='store_false',
                         help='Generate prompts in instruction model format')
 
     return parser.parse_args()
@@ -115,19 +119,31 @@ if __name__ == '__main__':
 
     docs_df = read_docs(docs_file)
 
+    print("Reading instruction prompts")
+    # read dictionary of instruction prompts from json file
+    with open(instruction_prompts_file, 'r') as f:
+        instructions_system_message = json.load(f)[prompt_key]
+
     if queries_file is None:
+        print("Generating prompts with documents only")
         doc_prompts = []
         for docid, doc in docs_df['doc'].items():
-            doc_prompts.append({'docid': docid, 'prompt': get_prompt(instructions=doc_quality_system_message[1].strip(),
+            doc_prompts.append({'docid': docid, 'prompt': get_prompt(instructions=instructions_system_message.strip(),
                                                                      document=doc.strip())})
 
         pd.DataFrame(doc_prompts).to_csv(output_file, index=False, sep='\t')
+        print(f"Prompts generated and saved to {output_file}")
+    else:
+        print("Generating prompts with queries and documents")
+        query_data = pd.read_csv(queries_file, sep='\t', names=['qid', 'qtext'], header=None, )
+        qrel_data = pd.read_csv(qrel_file, sep='\t')
 
-    # construct the prompts for the model
-    prompts = []
-    for qid, docid, label in val_set_qrel[['qid', 'docid', 'relevance']].itertuples(index=False):
-        prompts.append({'qid': qid, 'docid': docid,
-                        'prompt': get_prompt(instructions=system_message_dict[2].strip(),
-                                             query=query_data.qtext[qid].strip(),
-                                             document=docs_df.doc[docid].strip()), 'label': label})
-    val_prompts_df = pd.DataFrame(prompts)
+        # construct the prompts for the model
+        prompts = []
+        for qid, docid, label in qrel_data[['qid', 'docid', 'relevance']].itertuples(index=False):
+            prompts.append({'qid': qid, 'docid': docid,
+                            'prompt': get_prompt(instructions=instructions_system_message.strip(),
+                                                 query=query_data.qtext[qid].strip(),
+                                                 document=docs_df.doc[docid].strip()), 'label': label})
+        pd.DataFrame(prompts).to_csv(output_file, index=False, sep='\t')
+        print(f"Prompts generated and saved to {output_file}")
