@@ -168,7 +168,9 @@ if __name__ == '__main__':
 
     args = parse_arguments()
     prompts_file = args.prompts
+    logger.debug(f'Prompts file: {prompts_file}')
     model_id = args.model_id
+    logger.debug(f'Model ID: {model_id}')
     output_file = args.output + '_' + model_id.split('/')[-1] + '_{}.tsv'
     logger.debug(f'Output file: {output_file}')
 
@@ -197,9 +199,9 @@ if __name__ == '__main__':
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Load the validation prompts
-    val_prompts_df = pd.read_csv('data/val_prompts.tsv', sep='\t')
+    prompts_df = pd.read_csv(prompts_file, sep='\t')
 
-    _df = val_prompts_df[['qid', 'docid', 'prompt']].reset_index(drop=True)
+    _df = prompts_df[['qid', 'docid', 'prompt']].reset_index(drop=True)
     # save output file as a template string
 
     # Attempt to generate predictions up to 10 times
