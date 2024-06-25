@@ -1,3 +1,4 @@
+import argparse
 import logging
 import os
 import sys
@@ -132,7 +133,7 @@ def generate_predictions(_df, batch_size, max_new_tokens, max_input_length):
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Construct prompts for the model')
     parser.add_argument('--prompts', type=str, default='data', help='Path to the prompts JSON file')
-    parser.add_argument('--output', type=str, default='raw_output_run_llama8b', help='Path to the output TSV file')
+    parser.add_argument('--output', type=str, default='raw_output_run', help='Path to the output TSV file')
     parser.add_argument('--model_id', type=str, default='meta-llama/Meta-Llama-3-8B-Instruct', help='Model ID or path')
     parser.add_argument('--batch_size', type=int, default=32, help='Batch size')
 
@@ -163,8 +164,8 @@ if __name__ == '__main__':
 
     args = parse_arguments()
     prompts_file = args.prompts
-    output_file = args.output + '_{}.tsv'
     model_id = args.model_id
+    output_file = args.output + '_' + '-'.join(model_id.split('-')[:-2]) + '_{}.tsv'
     batch_size = args.batch_size
 
     # model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
