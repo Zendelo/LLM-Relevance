@@ -129,6 +129,14 @@ def generate_predictions(_df, batch_size, max_new_tokens, max_input_length):
     return output, failed_batches
 
 
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='Construct prompts for the model')
+    parser.add_argument('--prompts', type=str, default='data', help='Path to the prompts JSON file')
+    parser.add_argument('--output', type=str, default='prompts.tsv', help='Path to the output TSV file')
+
+    return parser.parse_args()
+
+
 if __name__ == '__main__':
     torch.set_default_device("cuda")
 

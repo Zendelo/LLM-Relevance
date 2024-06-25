@@ -1,4 +1,44 @@
 import pandas as pd
+from bs4 import BeautifulSoup
+from nltk.corpus import stopwords
+
+STOPWORDS = set(stopwords.words('english'))
+
+
+def clean_text(text: str, threshold=1024, truncate=False) -> str:
+    """Clean the text by removing extra spaces and newlines and html tags. If the text is longer than the threshold, it
+    can be truncated to the threshold length.
+    Args:
+        text (str): The text to clean.
+        threshold (int): The maximum length of the text.
+        truncate (bool): Whether to truncate the text if it is longer than the threshold.
+    Returns:
+        str: The cleaned text.
+    """
+    soup = BeautifulSoup(text, "html.parser")
+    output = soup.get_text()
+    output = " ".join(output.split())
+    if len(output) > threshold:
+        # logger.warning(f"Text might be too long: {len(output)} terms.")
+        # logger.debug(f"Long Text: {output[:30]} ... {output[-30:]}")
+        if truncate:
+            output = output[:threshold]
+            logger.debug(f"Truncated Text: {output}")
+    return output
+
+
+def compute_stopwords_ratio(text: str) -> float:
+    """Compute the ratio of stopwords in the text.
+    Args:
+        text (str): The text to compute the stopwords ratio.
+    Returns:
+        float: The ratio of stopwords in the text.
+    """
+    words = set(text.split())
+    if len(words) == 0:
+        return 0.0
+    stopwords_count = len(words.intersection(STOPWORDS))
+    return stopwords_count / len(words)
 
 
 def get_prompt(instructions, document, query=None):
@@ -18,10 +58,46 @@ def get_prompt(instructions, document, query=None):
     return prompt
 
 
+def read_docs(docs_file):
+    docs_df = (pd.read_json(docs_file, lines=True).map(clean_text).set_index('docid'))
+
+    docs_df = docs_df.assign(sw_ratio=docs_df.doc.apply(compute_stopwords_ratio),
+                             doc_len=docs_df.doc.str.len(),
+                             non_alnum_count=docs_df.doc.str.count(r'[^a-zA-Z0-9\s]'),
+                             non_alnum_ratio=docs_df.doc.str.count(r'[^a-zA-Z0-9\s]') / docs_df.doc.str.len(),
+                             longest_non_whitespace=docs_df['doc'].str.extract(r'(\S{2,})').map(len))
+
+    # remove documents with less than 2.5% stopwords and more than 1024 characters
+    docs_df.loc[(docs_df['sw_ratio'] < 0.025) & (docs_df['doc_len'] > 1024), 'doc'] = ''
+    # remove documents with more than 150 non-alphanumeric characters
+    docs_df.loc[docs_df.non_alnum_count > 150, 'doc'] = ''
+    # remove documents with less than 1% stopwords and more than 20% non-alphanumeric characters
+    docs_df.loc[(docs_df['sw_ratio'] < 0.01) & (docs_df['non_alnum_ratio'] > 0.2), 'doc'] = ''
+    # remove documents with sequnce longer than 25 characters
+    docs_df.loc[docs_df['longest_non_whitespace'] >= 25, 'doc'] = ''
+
+    return docs_df.assign(sw_ratio=docs_df.doc.apply(compute_stopwords_ratio),
+                          doc_len=docs_df.doc.str.len(),
+                          non_alnum_count=docs_df.doc.str.count(r'[^a-zA-Z0-9\s]'),
+                          non_alnum_ratio=(docs_df.non_alnum_count / docs_df.doc.str.len()).map(
+                              lambda x: 0.0 if x > 2 else x),
+                          longest_non_whitespace=docs_df['doc'].str.extract(r'(\S{2,})').map(lambda x: len(str(x))))
+
+
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Construct prompts for the model')
-    parser.add_argument('--prompts', type=str, default='data', help='Path to the prompts JSON file')
+    parser.add_argument('--sys_instruction_prompts', '-sip', type=str, default='data',
+                        help='Path to the prompts JSON file')
+    parser.add_argument('--prompt_key', '-pk', type=str, default='1',
+                        help='Key to the prompts in the JSON file')
+    parser.add_argument('--queries', '-q', type=str, help='Path to the queries file')
+    parser.add_argument('--docs', '-d', type=str, default='data/llm4eval_document_2024.jsonl',
+                        help='Path to the documents file')
+    parser.add_argument('--qrel', '-qr', type=str, default='data/llm4eval_dev_qrel.txt',
+                        help='Path to the qrel file')
     parser.add_argument('--output', type=str, default='prompts.tsv', help='Path to the output TSV file')
+    parser.add_argument('--instruct_format', '-if', type=store_false, default=True,
+                        help='Generate prompts in instruction model format')
 
     return parser.parse_args()
 
@@ -29,14 +105,23 @@ def parse_arguments():
 if __name__ == '__main__':
 
     args = parse_arguments()
-    data_dir = args.data_dir
+    instruction_prompts_file = args.sys_instruction_prompts
+    prompt_key = args.prompt_key
+    queries_file = args.queries
+    docs_file = args.docs
+    qrel_file = args.qrel
+    output_file = args.output
+    instruct_format = args.instruct_format
 
-    doc_prompts = []
-    for docid, doc in docs_df['doc'].items():
-        doc_prompts.append({'docid': docid, 'prompt': get_prompt(instructions=doc_quality_system_message[1].strip(),
-                                                                 document=doc.strip())})
+    docs_df = read_docs(docs_file)
 
-    pd.DataFrame(doc_prompts).to_csv('doc_prompts.csv', index=False)
+    if queries_file is None:
+        doc_prompts = []
+        for docid, doc in docs_df['doc'].items():
+            doc_prompts.append({'docid': docid, 'prompt': get_prompt(instructions=doc_quality_system_message[1].strip(),
+                                                                     document=doc.strip())})
+
+        pd.DataFrame(doc_prompts).to_csv(output_file, index=False, sep='\t')
 
     # construct the prompts for the model
     prompts = []
