@@ -170,6 +170,7 @@ if __name__ == '__main__':
     prompts_file = args.prompts
     model_id = args.model_id
     output_file = args.output + '_' + '-'.join(model_id.split('/')[-1]) + '_{}.tsv'
+    logger.debug(f'Output file: {output_file}')
 
     batch_size = args.batch_size
 
