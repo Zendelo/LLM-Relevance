@@ -132,7 +132,9 @@ def generate_predictions(_df, batch_size, max_new_tokens, max_input_length):
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Construct prompts for the model')
     parser.add_argument('--prompts', type=str, default='data', help='Path to the prompts JSON file')
-    parser.add_argument('--output', type=str, default='prompts.tsv', help='Path to the output TSV file')
+    parser.add_argument('--output', type=str, default='raw_output_run_llama8b', help='Path to the output TSV file')
+    parser.add_argument('--model_id', type=str, default='meta-llama/Meta-Llama-3-8B-Instruct', help='Model ID or path')
+    parser.add_argument('--batch_size', type=int, default=32, help='Batch size')
 
     return parser.parse_args()
 
@@ -159,8 +161,14 @@ if __name__ == '__main__':
 
     logger.info(f'Started logging...')
 
+    args = parse_arguments()
+    prompts_file = args.prompts
+    output_file = args.output + '_{}.tsv'
+    model_id = args.model_id
+    batch_size = args.batch_size
+
     # model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
-    model_id = "meta-llama/Meta-Llama-3-70B-Instruct"
+    # model_id = "meta-llama/Meta-Llama-3-70B-Instruct"
     # model_id = "meta-llama/Meta-Llama-3-8B"
     cache_dir = os.getenv("HF_HOME")
     hf_token = os.getenv("HF_TOKEN")
@@ -172,9 +180,8 @@ if __name__ == '__main__':
     max_input_length = 2048
     device_map = "auto"
     max_new_tokens = 256
-    batch_size = 32
+
     # output_file = 'raw_output_run_llama8b-inst_{}.tsv'
-    output_file = 'raw_output_run_llama70b_{}.tsv'
 
     tokenizer, model = load_model_infer(model_id, cache_dir, hf_token, device_map)
 
