@@ -201,8 +201,12 @@ if __name__ == '__main__':
     # Load the validation prompts
     prompts_df = pd.read_csv(prompts_file, sep='\t')
 
-    _df = prompts_df[['qid', 'docid', 'prompt']].reset_index(drop=True)
-    # save output file as a template string
+    if prompts_df.shape[1] == 3:
+        _df = prompts_df[['qid', 'docid', 'prompt']].reset_index(drop=True)
+    elif prompts_df.shape[1] == 2:
+        _df = prompts_df[['docid', 'prompt']].reset_index(drop=True)
+    else:
+        raise ValueError(f'Prompts file should have either 2 or 3 columns, found {prompts_df.shape[1]} columns.')
 
     # Attempt to generate predictions up to 10 times
     for i in range(10):
