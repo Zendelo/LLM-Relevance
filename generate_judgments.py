@@ -123,10 +123,14 @@ def generate_predictions(_df, batch_size, max_new_tokens, max_input_length):
 
         predictions = tokenizer.batch_decode(predictions, skip_special_tokens=True, clean_up_tokenization_spaces=True)
 
-        for i, qid, docid, prompt in examples.itertuples(index=True):
-            prediction = predictions[i].split('assistant')[-1].strip()
-            output.append({'qid': qid, 'docid': docid, 'prediction': prediction})
-
+        if examples.shape[1] == 3:
+            for i, qid, docid, prompt in examples.itertuples(index=True):
+                prediction = predictions[i].split('assistant')[-1].strip()
+                output.append({'qid': qid, 'docid': docid, 'prediction': prediction})
+        elif examples.shape[1] == 2:
+            for i, docid, prompt in examples.itertuples(index=True):
+                prediction = predictions[i].split('assistant')[-1].strip()
+                output.append({'docid': docid, 'prediction': prediction})
     return output, failed_batches
 
 
