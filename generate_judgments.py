@@ -140,6 +140,8 @@ def parse_arguments():
     parser.add_argument('--output', type=str, default='raw_output_run', help='Path to the output TSV file')
     parser.add_argument('--model_id', type=str, default='meta-llama/Meta-Llama-3-8B-Instruct', help='Model ID or path')
     parser.add_argument('--batch_size', type=int, default=32, help='Batch size')
+    parser.add_argument('--max_new_tokens', type=int, default=256, help='Maximum new tokens')
+    parser.add_argument('--max_input_length', type=int, default=2048, help='Maximum input length')
 
     return parser.parse_args()
 
@@ -175,6 +177,11 @@ if __name__ == '__main__':
     logger.debug(f'Output file: {output_file}')
 
     batch_size = args.batch_size
+    logger.debug(f'Batch size: {batch_size}')
+    max_new_tokens = args.max_new_tokens
+    logger.debug(f'Max new tokens: {max_new_tokens}')
+    max_input_length = args.max_input_length
+    logger.debug(f'Max input length: {max_input_length}')
 
     # model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
     # model_id = "meta-llama/Meta-Llama-3-70B-Instruct"
@@ -186,9 +193,7 @@ if __name__ == '__main__':
     lora_dropout = 0.1
     # max_input_length = 8192
     # max_input_length = 4096
-    max_input_length = 2048
     device_map = "auto"
-    max_new_tokens = 256
 
     # output_file = 'raw_output_run_llama8b-inst_{}.tsv'
 
