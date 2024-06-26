@@ -133,10 +133,11 @@ def generate_predictions(_df, batch_size, max_new_tokens, max_input_length):
             for i, docid, prompt in examples.itertuples(index=True):
                 prediction = predictions[i].split('assistant')[-1].strip()
                 output.append({'docid': docid, 'prediction': prediction})
-        if batch_counter % 100 == 0:
+        if batch_counter % 20 == 0:
             logger.debug(f'\nFinished batch {batch_counter}, last output:')
             logger.debug(output[-1])
-            subprocess.run(['nvidia-smi', '--query-gpu=memory.used'])
+            print('\n\nGPU Memory Usage:')
+            subprocess.run(['nvidia-smi'])
             subprocess.run(['gpustat', '-cp'])
         batch_counter += 1
     return output, failed_batches
