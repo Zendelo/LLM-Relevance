@@ -135,6 +135,8 @@ def generate_predictions(_df, batch_size, max_new_tokens, max_input_length):
         if batch_counter % 100 == 0:
             logger.debug(f'Finished batch # {batch_counter}, last output:')
             logger.debug(output[-1])
+            # run a shell command
+            os.system('gpustat -cp')
     return output, failed_batches
 
 
