@@ -139,8 +139,7 @@ def generate_predictions(_df, batch_size, max_new_tokens, max_input_length):
             logger.debug(f'\nFinished batch {batch_counter}, last output:')
             logger.debug(output[-1])
             print('\n\nGPU Memory Usage:')
-            subprocess.run(['nvidia-smi'])
-            subprocess.run(['gpustat', '-cp'])
+            subprocess.run(['gpustat', '-f', '--color'])
         batch_counter += 1
     return output, failed_batches
 
