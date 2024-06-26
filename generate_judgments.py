@@ -135,7 +135,7 @@ def generate_predictions(_df, batch_size, max_new_tokens, max_input_length):
             for i, docid, prompt in examples.itertuples(index=True):
                 prediction = predictions[i].split('assistant')[-1].strip()
                 output.append({'docid': docid, 'prediction': prediction})
-        if batch_counter % 20 == 0:
+        if batch_counter % 50 == 0:
             logger.debug(f'\nFinished batch {batch_counter}, last output:')
             logger.debug(output[-1])
             print('\n\nGPU Usage:')
