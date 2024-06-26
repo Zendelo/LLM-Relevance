@@ -120,6 +120,8 @@ def generate_predictions(_df, batch_size, max_new_tokens, max_input_length):
             except Exception as e:
                 logger.error(f"Error in batch: {rng}")
                 logger.error(e)
+                print('\n\nGPU Memory Usage:')
+                subprocess.run(['gpustat', '-cp'])
                 failed_batches.append(rng)
                 continue
 
