@@ -135,7 +135,7 @@ if __name__ == '__main__':
         print(f"Prompts generated and saved to {output_file}")
     else:
         print("Generating prompts with queries and documents")
-        query_data = pd.read_csv(queries_file, sep='\t', names=['qid', 'qtext'], header=None, )
+        query_data = pd.read_csv(queries_file, sep='\t', names=['qid', 'qtext'], header=None, index_col=0)
         qrel_data = pd.read_csv(qrel_file, sep='\t')
 
         # construct the prompts for the model
