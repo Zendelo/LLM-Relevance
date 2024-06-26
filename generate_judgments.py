@@ -127,7 +127,7 @@ def generate_predictions(_df, batch_size, max_new_tokens, max_input_length):
 
         predictions = tokenizer.batch_decode(predictions, skip_special_tokens=True, clean_up_tokenization_spaces=True)
 
-        if examples.shape[1] == 3:
+        if examples.shape[1] == 4:
             for i, qid, docid, prompt in examples.itertuples(index=True):
                 prediction = predictions[i].split('assistant')[-1].strip()
                 output.append({'qid': qid, 'docid': docid, 'prediction': prediction})
@@ -216,12 +216,12 @@ if __name__ == '__main__':
     # Load the validation prompts
     prompts_df = pd.read_csv(prompts_file, sep='\t')
 
-    if prompts_df.shape[1] == 3:
+    if prompts_df.shape[1] == 4:
         _df = prompts_df[['qid', 'docid', 'prompt']].reset_index(drop=True)
     elif prompts_df.shape[1] == 2:
         _df = prompts_df[['docid', 'prompt']].reset_index(drop=True)
     else:
-        raise ValueError(f'Prompts file should have either 2 or 3 columns, found {prompts_df.shape[1]} columns.')
+        raise ValueError(f'Prompts file should have either 2 or 4 columns, found {prompts_df.shape[1]} columns.')
 
     # Attempt to generate predictions up to 10 times
     for i in range(10):
