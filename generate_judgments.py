@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 import sys
+import subprocess
 
 import pandas as pd
 import torch
@@ -133,10 +134,11 @@ def generate_predictions(_df, batch_size, max_new_tokens, max_input_length):
                 prediction = predictions[i].split('assistant')[-1].strip()
                 output.append({'docid': docid, 'prediction': prediction})
         if batch_counter % 100 == 0:
-            logger.debug(f'Finished batch # {batch_counter}, last output:')
+            logger.debug(f'\nFinished batch {batch_counter}, last output:')
             logger.debug(output[-1])
-            # run a shell command
-            os.system('gpustat -cp')
+            subprocess.run(['nvidia-smi', '--query-gpu=memory.used'])
+            subprocess.run(['gpustat', '-cp'])
+        batch_counter += 1
     return output, failed_batches
 
 
