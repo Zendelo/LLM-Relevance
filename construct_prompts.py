@@ -165,7 +165,7 @@ if __name__ == '__main__':
                 docids_chunks = np.array_split(_df['docid'], len(_df['docid']) // 3)
                 for docids in docids_chunks:
                     docs = [docs_df.doc[docid] for docid in docids]
-                    prompts.append({'qid': qid, 'docids': docids.tolist(),
+                    prompts.append({'qid': qid, 'docid': docids.tolist(),
                                     'prompt': get_prompt_multi_docs(instructions=instructions_system_message.strip(),
                                                                     documents=docs,
                                                                     query=query_data.qtext[qid].strip()),
