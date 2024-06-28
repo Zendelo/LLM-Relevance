@@ -1,4 +1,4 @@
-qid	docids	prompt	label
+qid	docid	prompt	label
 q10	['p1288', 'p11589', 'p5903', 'p3740']	"<|start_header_id|>system<|end_header_id|>You are a search quality rater evaluating the relevance of passages to a query.
      Given a query and several passages, you must first arrange the passages in order of relevance to the query.
      Then, provide a score on an integer scale of 0 to 3 (ties allowed) with the following meanings:
