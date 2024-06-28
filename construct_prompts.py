@@ -168,7 +168,8 @@ if __name__ == '__main__':
                     prompts.append({'qid': qid, 'docids': docids.tolist(),
                                     'prompt': get_prompt_multi_docs(instructions=instructions_system_message.strip(),
                                                                     documents=docs,
-                                                                    query=query_data.qtext[qid].strip())})
+                                                                    query=query_data.qtext[qid].strip()),
+                                    'label': _df['relevance'].tolist()})
             pd.DataFrame(prompts).to_csv(output_file, index=False, sep='\t')
 
         else:
