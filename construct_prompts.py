@@ -1,8 +1,7 @@
 import argparse
 import json
-import logging
-import sys
 
+import numpy as np
 import pandas as pd
 from bs4 import BeautifulSoup
 from nltk.corpus import stopwords
@@ -28,7 +27,7 @@ def clean_text(text: str, threshold=1024, truncate=False) -> str:
         # logger.debug(f"Long Text: {output[:30]} ... {output[-30:]}")
         if truncate:
             output = output[:threshold]
-            logger.debug(f"Truncated Text: {output}")
+            # logger.debug(f"Truncated Text: {output}")
     return output
 
 
@@ -58,6 +57,24 @@ def get_prompt(instructions, document, query=None):
         <|start_header_id|>user<|end_header_id|>
     Query: {query}
     Document: {document}
+    <|eot_id|><|start_header_id|>assistant<|end_header_id|>
+    """
+    return prompt
+
+
+def get_prompt_multi_docs(instructions, documents, query=None):
+    expanded_docs = '\n\n'.join([f'doc-{i}: {doc}' for i, doc in enumerate(documents, start=1)])
+    if query is None:
+        prompt = f"""<|start_header_id|>system<|end_header_id|>{instructions}<|eot_id|>
+        <|start_header_id|>user<|end_header_id|>
+    *Documents*:\n\n{expanded_docs}\n\n
+    <|eot_id|><|start_header_id|>assistant<|end_header_id|>
+    """
+    else:
+        prompt = f"""<|start_header_id|>system<|end_header_id|>{instructions}<|eot_id|>
+        <|start_header_id|>user<|end_header_id|>
+    *Query*: {query}
+    *Documents*:\n\n{expanded_docs}\n\n
     <|eot_id|><|start_header_id|>assistant<|end_header_id|>
     """
     return prompt
@@ -102,6 +119,7 @@ def parse_arguments():
     parser.add_argument('--output', type=str, default='prompts.tsv', help='Path to the output TSV file')
     parser.add_argument('--instruct_format', '-if', action='store_false',
                         help='Generate prompts in instruction model format')
+    parser.add_argument('--n_docs', '-n', type=int, default=1, help='Number of documents to include in the prompt')
 
     return parser.parse_args()
 
@@ -111,6 +129,8 @@ if __name__ == '__main__':
     args = parse_arguments()
     instruction_prompts_file = args.sys_instruction_prompts
     prompt_key = args.prompt_key
+    n_docs = args.n_docs
+
     queries_file = args.queries
     docs_file = args.docs
     qrel_file = args.qrel
@@ -134,16 +154,34 @@ if __name__ == '__main__':
         pd.DataFrame(doc_prompts).to_csv(output_file, index=False, sep='\t')
         print(f"Prompts generated and saved to {output_file}")
     else:
-        print("Generating prompts with queries and documents")
-        query_data = pd.read_csv(queries_file, sep='\t', names=['qid', 'qtext'], header=None, index_col=0)
-        qrel_data = pd.read_csv(qrel_file, sep='\t')
+        if n_docs > 1:
+            print(f'Generating prompts with {n_docs} documents')
+            query_data = pd.read_csv(queries_file, sep='\t', names=['qid', 'qtext'], header=None, index_col=0)
+            qrel_data = pd.read_csv(qrel_file, sep='\t')
 
-        # construct the prompts for the model
-        prompts = []
-        for qid, docid, label in qrel_data[['qid', 'docid', 'relevance']].itertuples(index=False):
-            prompts.append({'qid': qid, 'docid': docid,
-                            'prompt': get_prompt(instructions=instructions_system_message.strip(),
-                                                 query=query_data.qtext[qid].strip(),
-                                                 document=docs_df.doc[docid].strip()), 'label': label})
-        pd.DataFrame(prompts).to_csv(output_file, index=False, sep='\t')
-        print(f"Prompts generated and saved to {output_file}")
+            # construct the prompts for the model
+            prompts = []
+            for qid, _df in qrel_data.groupby('qid')[['docid', 'relevance']]:
+                docids_chunks = np.array_split(_df['docid'], len(_df['docid']) // 3)
+                for docids in docids_chunks:
+                    docs = [docs_df.doc[docid] for docid in docids]
+                    prompts.append({'qid': qid, 'docids': docids.tolist(),
+                                    'prompt': get_prompt_multi_docs(instructions=instructions_system_message.strip(),
+                                                                    documents=docs,
+                                                                    query=query_data.qtext[qid].strip())})
+            pd.DataFrame(prompts).to_csv(output_file, index=False, sep='\t')
+
+        else:
+            print("Generating prompts with queries and documents")
+            query_data = pd.read_csv(queries_file, sep='\t', names=['qid', 'qtext'], header=None, index_col=0)
+            qrel_data = pd.read_csv(qrel_file, sep='\t')
+
+            # construct the prompts for the model
+            prompts = []
+            for qid, docid, label in qrel_data[['qid', 'docid', 'relevance']].itertuples(index=False):
+                prompts.append({'qid': qid, 'docid': docid,
+                                'prompt': get_prompt(instructions=instructions_system_message.strip(),
+                                                     query=query_data.qtext[qid].strip(),
+                                                     document=docs_df.doc[docid].strip()), 'label': label})
+            pd.DataFrame(prompts).to_csv(output_file, index=False, sep='\t')
+            print(f"Prompts generated and saved to {output_file}")
