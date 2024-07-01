@@ -163,13 +163,14 @@ if __name__ == '__main__':
             prompts = []
             for qid, _df in qrel_data.groupby('qid')[['docid', 'relevance']]:
                 docids_chunks = np.array_split(_df['docid'], len(_df['docid']) // 3)
-                for docids in docids_chunks:
+                labels_chunks = np.array_split(_df['relevance'], len(_df['relevance']) // 3)
+                for i, docids in enumerate(docids_chunks):
                     docs = [docs_df.doc[docid] for docid in docids]
                     prompts.append({'qid': qid, 'docid': docids.tolist(),
                                     'prompt': get_prompt_multi_docs(instructions=instructions_system_message.strip(),
                                                                     documents=docs,
                                                                     query=query_data.qtext[qid].strip()),
-                                    'label': _df['relevance'].tolist()})
+                                    'label': labels_chunks[i].tolist()})
             pd.DataFrame(prompts).to_csv(output_file, index=False, sep='\t')
 
         else:
