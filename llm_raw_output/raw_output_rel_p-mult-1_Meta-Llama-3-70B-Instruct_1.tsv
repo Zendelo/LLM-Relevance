@@ -1,0 +1,233 @@
+qid	docid	prediction
+q12	['p10903', 'p1745', 'p6863']	"Here is my evaluation of the passages:
+
+     The order of the passages is: doc-1, doc-3, doc-2. 
+
+     doc-1 is the most relevant because it provides general information on choosing track spikes, mentioning specific factors to consider. 
+
+     doc-3 is also relevant as it discusses the effect of track surface on spike selection, which is a factor in selecting track spikes. 
+
+     doc-2 is less relevant as it is a product description and does not provide general information on factors affecting track spike selection.
+
+     {""pid"": ""doc-1"", ""explanation"": ""Provides general information on choosing track spikes"", ""relevance"": 2}
+     {""pid"": ""doc-3"", ""explanation"": ""Discusses the effect of track surface on spike selection"", ""relevance"": 2}
+     {""pid"": ""doc-2"", ""explanation"": ""Product description, not directly related to the query"", ""relevance"": 1}"
+q12	['p6253', 'p3656', 'p9222']	"Explanation: I arranged the passages in order of relevance based on their content. Passage 1 is directly related to track spikes and discusses factors affecting their selection. Passage 2 is unrelated to track spikes, but mentions ""spike"" in a different context. Passage 3 is completely unrelated to track spikes or athletics.
+
+{""pid"": ""doc-1"", ""explanation"": ""Directly discusses factors affecting track spike selection"", ""relevance"": 2}
+{""pid"": ""doc-2"", ""explanation"": ""Unrelated to track spikes, mentions'spike' in a different context"", ""relevance"": 0}
+{""pid"": ""doc-3"", ""explanation"": ""Completely unrelated to track spikes or athletics"", ""relevance"": 0}"
+q12	['p6738', 'p11004', 'p3402']	"Here is the order of relevance: doc-2, doc-3, doc-1
+
+     Explanation: Doc-2 and doc-3 are more relevant because they discuss the factors that affect the selection of track spikes, such as distance and the characteristics of the spikes. Doc-1 is less relevant as it only introduces the importance of track spikes in general without providing specific information about the selection factors.
+
+     {""pid"": ""doc-2"", ""explanation"": ""Discusses factors affecting track spike selection"", ""relevance"": 2}
+     {""pid"": ""doc-3"", ""explanation"": ""Explains the importance of spikes for speed and support"", ""relevance"": 2}
+     {""pid"": ""doc-1"", ""explanation"": ""Introduces the importance of track spikes"", ""relevance"": 1}"
+q12	['p4285', 'p8299', 'p1248']	"Explanation: The order of the passages is based on their relevance to the query. Passage 3 is the most relevant as it directly talks about track spikes and their design for different track events. Passage 2 is also relevant as it discusses the factors to consider when selecting track shoes, including cushioning and spike count. Passage 1 is irrelevant as it appears to be a university athletics website with no information related to track spikes or their selection.
+
+     {""pid"": ""doc-1"", ""explanation"": ""Irrelevant passage, does not discuss track spikes or their selection"", ""relevance"": 0}
+     {""pid"": ""doc-2"", ""explanation"": ""Discusses factors to consider when selecting track shoes, including cushioning and spike count"", ""relevance"": 2}
+     {""pid"": ""doc-3"", ""explanation"": ""Directly talks about track spikes and their design for different track events"", ""relevance"": 3}"
+q12	['p5793', 'p1912', 'p1783']	"The order of the passages is: doc-3, doc-1, doc-2. 
+     Passage doc-3 is the most relevant as it mentions the short nature of the spike, which is a factor affecting the selection of track spikes. Passage doc-1 is also relevant as it describes the design of track spikes, which could be related to the selection factors. Passage doc-2 is the least relevant as it discusses the benefits of track spikes being light in weight, which is not directly related to the selection factors.
+
+    {""pid"": ""doc-3"", ""explanation"": ""most relevant"", ""relevance"": 2}
+    {""pid"": ""doc-1"", ""explanation"": ""describes design of track spikes"", ""relevance"": 1}
+    {""pid"": ""doc-2"", ""explanation"": ""least relevant"", ""relevance"": 0}"
+q12	['p6209', 'p10315', 'p6465']	"Here is the arrangement of passages in order of relevance to the query, along with a brief explanation:
+
+The passages are arranged in the order of doc-2, doc-3, and doc-1. The reason for this order is that doc-2 and doc-3 provide specific information about the factors that affect the selection of track spikes, such as spike length, shape, and material, as well as the heel area support, which are directly related to the query. Doc-1, on the other hand, provides some general information about sprint spikes, but it is not directly addressing the factors that affect the selection of track spikes.
+
+Here are the relevance scores for each passage in JSON format:
+
+{""pid"": ""doc-2"", ""explanation"": ""Provides specific information about the factors that affect the selection of track spikes"", ""relevance"": 2}
+{""pid"": ""doc-3"", ""explanation"": ""Provides specific information about the factors that affect the selection of track spikes"", ""relevance"": 2}
+{""pid"": ""doc-1"", ""explanation"": ""Provides some general information about sprint spikes"", ""relevance"": 1}"
+q12	['p11423', 'p5773', 'p11247']	"Here is my evaluation:
+     The order of the passages is: doc-2, doc-3, doc-1. 
+     I placed doc-2 first because it directly addresses the query by mentioning the factors that affect the selection of track spikes, which is the purpose of the spikes. 
+     Doc-3 is second because it provides information on the differences between track distance shoes and sprinting spikes, which is related to the query. 
+     Doc-1 is last because it only provides general information about track and field athletes needing specific shoes, but does not directly address the query.
+
+     {""pid"": ""doc-2"", ""explanation"": ""Directly addresses the query by mentioning the factors that affect the selection of track spikes"", ""relevance"": 3}
+     {""pid"": ""doc-3"", ""explanation"": ""Provides information on the differences between track distance shoes and sprinting spikes"", ""relevance"": 2}
+     {""pid"": ""doc-1"", ""explanation"": ""Provides general information about track and field athletes needing specific shoes"", ""relevance"": 1}"
+q12	['p11420', 'p9398', 'p5259']	"Explanation: The passages are arranged in order of relevance based on their focus on track spikes and factors affecting their selection. Passage 3 is the most relevant as it discusses specific features of track spikes that affect comfort and performance. Passage 2 is also relevant as it provides advice on selecting track spikes, although it's more focused on affordability. Passage 1 is less relevant as it discusses foot strike patterns in running, which is only tangentially related to track spikes.
+
+     {""pid"": ""doc-1"", ""explanation"": ""Less relevant as it discusses foot strike patterns"", ""relevance"": 1}
+     {""pid"": ""doc-2"", ""explanation"": ""Relevant as it provides advice on selecting track spikes"", ""relevance"": 2}
+     {""pid"": ""doc-3"", ""explanation"": ""Most relevant as it discusses specific features of track spikes"", ""relevance"": 3}"
+q12	['p2244', 'p11277', 'p4561']	"Here is my evaluation:
+
+The order of the passages is: doc-1, doc-2, doc-3. 
+
+Passage doc-1 is the most relevant because it directly addresses the query by explaining the factors that affect the selection of track spikes, specifically the type of spike plate and its comfort. Passage doc-2 is also relevant as it mentions the factors that athletes consider when selecting track spikes, such as support and cushioning. Passage doc-3 is the least relevant as it talks about the versatility of a specific brand of track spikes, but does not directly address the query.
+
+Here are the relevance scores in JSON format:
+
+{""pid"": ""doc-1"", ""explanation"": ""Directly addresses the query by explaining the factors that affect the selection of track spikes"", ""relevance"": 3}
+{""pid"": ""doc-2"", ""explanation"": ""Mentions the factors that athletes consider when selecting track spikes"", ""relevance"": 2}
+{""pid"": ""doc-3"", ""explanation"": ""Does not directly address the query, but talks about the versatility of a specific brand of track spikes"", ""relevance"": 1}"
+q12	['p5439', 'p2797', 'p2154']	"Here is the order of relevance explanation: 
+     The most relevant passage is doc-3, as it directly addresses the importance of wearing track spikes for junior and senior athletes, specifically for the 400m event. Doc-1 is also relevant as it discusses the features of Saucony track spikes, which could be a factor in selecting them. Doc-2 is less relevant as it talks about Saucony's sponsorship and design, but not directly about factors affecting selection.
+
+     Here are the relevance scores in JSON format:
+     {""pid"": ""doc-3"", ""explanation"": ""Directly addresses the importance of wearing track spikes for junior and senior athletes"", ""relevance"": 2}
+     {""pid"": ""doc-1"", ""explanation"": ""Discusses features of Saucony track spikes"", ""relevance"": 2}
+     {""pid"": ""doc-2"", ""explanation"": ""Tangentially related to track spikes, but not directly about selection factors"", ""relevance"": 1}"
+q12	['p4799', 'p2333', 'p3557']	"Based on the query, I arranged the passages in the following order: doc-3, doc-2, doc-1. 
+
+    The passage doc-3 is the most relevant as it discusses the spike arrangement in high jump shoes, which is a key factor in selecting track spikes. 
+
+    Doc-2 is also relevant as it describes the features of a specific high jump spike model, including the material and design, which could be important factors in selection. 
+
+    Doc-1 is the least relevant as it provides a general overview of the evolution of high jump spikes but does not specifically address the factors affecting selection.
+
+    {""pid"": ""doc-3"", ""explanation"": ""Discusses spike arrangement in high jump shoes"", ""relevance"": 2}
+    {""pid"": ""doc-2"", ""explanation"": ""Describes features of a high jump spike model"", ""relevance"": 2}
+    {""pid"": ""doc-1"", ""explanation"": ""Provides general overview of high jump spike evolution"", ""relevance"": 1}"
+q12	['p7247', 'p5817', 'p272']	"Explanation: I arranged the passages in order of relevance based on how directly they address the query about factors affecting the selection of track spikes for junior and senior athletes. Passage 2 is the most relevant as it explicitly mentions junior athletes and considers factors such as price points. Passage 1 is also relevant as it discusses the comfort and power aspects of spike plates, which could be factors in selection. Passage 3 is less relevant as it primarily focuses on a specific brand and type of spike, without directly addressing the query.
+
+     {""pid"": ""doc-2"", ""explanation"": """", ""relevance"": 2}
+     {""pid"": ""doc-1"", ""explanation"": """", ""relevance"": 2}
+     {""pid"": ""doc-3"", ""explanation"": """", ""relevance"": 1}"
+q12	['p4985', 'p9058', 'p10471']	"The order of the passages is: doc-3, doc-1, doc-2.
+
+     Explanation: doc-3 is related to track athletics, but it doesn't directly address the query. doc-1 mentions youth track spikes and mentions a factor (funds available) that affects the selection of track spikes for junior athletes. doc-2 is a list of track spikes and doesn't provide any information about the factors affecting the selection of track spikes.
+
+     {""pid"": ""doc-1"", ""explanation"": ""Mentions a factor affecting track spike selection for junior athletes"", ""relevance"": 1}
+     {""pid"": ""doc-2"", ""explanation"": ""List of track spikes, no information about selection factors"", ""relevance"": 0}
+     {""pid"": ""doc-3"", ""explanation"": ""Related to track athletics, but doesn't address the query"", ""relevance"": 1}"
+q12	['p11202', 'p5135', 'p2223']	"Explanation: I arranged the passages in order of relevance based on how directly they address the query about factors affecting the selection of track spikes for junior and senior athletes. Passage 3 is the most relevant as it provides a step-by-step guide for selecting spikes, including factors to consider. Passage 2 is somewhat relevant as it mentions the use of spikes on track surfaces, but it doesn't specifically address the selection of spikes for athletes. Passage 1 is the least relevant as it compares microspikes and crampons, which are not directly related to track spikes.
+
+     {""pid"": ""doc-3"", ""explanation"": ""Provides a step-by-step guide for selecting track spikes"", ""relevance"": 2}
+     {""pid"": ""doc-2"", ""explanation"": ""Mentions the use of spikes on track surfaces"", ""relevance"": 1}
+     {""pid"": ""doc-1"", ""explanation"": ""Compares microspikes and crampons, not directly related to track spikes"", ""relevance"": 0}"
+q12	['p10542', 'p5070', 'p8753']	"Explanation: I arranged the passages in order of relevance based on how directly they address the query about factors affecting the selection of track spikes for junior and senior athletes. Passage 3 is the most relevant as it provides specific information about the type, size, and required amount of spikes, which are key factors in selecting track spikes. Passage 2 is also relevant as it mentions looking for versatility in track spikes, which is a factor to consider. Passage 1 is less relevant as it only provides general information about track spikes being used in different events.
+
+{""pid"": ""doc-3"", ""explanation"": ""Provides specific information about the type, size, and required amount of spikes"", ""relevance"": 2}
+{""pid"": ""doc-2"", ""explanation"": ""Mentions looking for versatility in track spikes"", ""relevance"": 2}
+{""pid"": ""doc-1"", ""explanation"": ""Provides general information about track spikes being used in different events"", ""relevance"": 1}"
+q12	['p1498', 'p1622', 'p6942']	"Explanation: I arranged the passages in order of relevance based on the presence of keywords related to track spikes and their selection. Passage 3 is the most relevant as it discusses the common type of footwear used in racing and the factor of spike length depending on race conditions, which is closely related to the query. Passage 1 is also relevant as it describes different types of spikes, but it does not directly address the selection of track spikes for junior and senior athletes. Passage 2 is empty and therefore irrelevant.
+
+     {""pid"": ""doc-3"", ""explanation"": ""Directly addresses the type of footwear and factors affecting spike selection"", ""relevance"": 2}
+     {""pid"": ""doc-1"", ""explanation"": ""Describes different types of spikes"", ""relevance"": 1}
+     {""pid"": ""doc-2"", ""explanation"": ""Empty passage"", ""relevance"": 0}"
+q48	['p10319', 'p4495', 'p4314']	"Here is my evaluation:
+
+     The passages are arranged in order of relevance as follows: doc-2, doc-1, doc-3. The most relevant passage is doc-2, which directly answers the query by stating that training once a week can lead to significant increases in muscle thickness. Doc-1 is also relevant, as it compares the effects of training once a week to training twice a week, although it does not provide a clear answer to the query. Doc-3 is the least relevant, as it discusses the effectiveness of different training frequencies, but does not specifically address the question of whether older adults can gain strength by training once per week.
+
+     {""pid"": ""doc-2"", ""explanation"": ""Directly answers the query"", ""relevance"": 3}
+     {""pid"": ""doc-1"", ""explanation"": ""Compares training frequencies, relevant but unclear"", ""relevance"": 2}
+     {""pid"": ""doc-3"", ""explanation"": ""Discusses training frequencies, but not directly relevant"", ""relevance"": 1}"
+q48	['p7954', 'p10234', 'p254']	"The order of relevance is doc-2, doc-1, doc-3 because doc-2 directly answers the query by comparing muscle growth with different training frequencies, including once per week. Doc-1 is related to the query as it discusses the correlation between the number of sets and muscle gain, which is relevant to strength training. Doc-3 is less relevant as it focuses on a specific deadlift training strategy and does not directly address the query.
+
+     {""pid"": ""doc-2"", ""explanation"": ""directly answers the query"", ""relevance"": 2}
+     {""pid"": ""doc-1"", ""explanation"": ""related to strength training"", ""relevance"": 1}
+     {""pid"": ""doc-3"", ""explanation"": ""less relevant"", ""relevance"": 0}"
+q48	['p1517', 'p2185', 'p9998']	"Here is my evaluation:
+     The order of relevance is: doc-3, doc-2, doc-1. 
+     Doc-3 is the most relevant as it directly answers the query, stating that older adults can maintain their strength by training once per week. Doc-2 is related to the query as it discusses post-workout routines, but it doesn't specifically address the query. Doc-1 is irrelevant as it discusses a specific workout routine and doesn't mention training frequency or older adults.
+
+     {""pid"": ""doc-1"", ""explanation"": ""Irrelevant passage discussing a specific workout routine"", ""relevance"": 0}
+     {""pid"": ""doc-2"", ""explanation"": ""Related passage discussing post-workout routines"", ""relevance"": 1}
+     {""pid"": ""doc-3"", ""explanation"": ""Perfectly relevant passage directly answering the query"", ""relevance"": 3}"
+q48	['p9413', 'p4078', 'p3767']	"Explanation: I arranged the passages in the order of doc-2, doc-3, and doc-1 because doc-2 directly answers the query, stating that older adults can gain strength by training once per week. Doc-3 provides related information about training frequency and volume, which is relevant to the query. Doc-1, on the other hand, compares training frequencies but does not specifically address the query.
+
+{""pid"": ""doc-2"", ""explanation"": ""Directly answers the query"", ""relevance"": 3}
+{""pid"": ""doc-3"", ""explanation"": ""Provides related information about training frequency and volume"", ""relevance"": 2}
+{""pid"": ""doc-1"", ""explanation"": ""Compares training frequencies but does not specifically address the query"", ""relevance"": 1}"
+q48	['p5952', 'p6761', 'p696']	"The order of the passages from most relevant to least relevant is: doc-1, doc-3, doc-2. The most relevant passage, doc-1, directly answers the query by stating that lifting once a week can maintain strength and even lead to some gains. The second most relevant passage, doc-3, also addresses the query, but in a more general sense, stating that hitting all major muscle groups once a week can help maintain muscle and strength gains. The least relevant passage, doc-2, does not directly answer the query and only mentions reducing strength training to once a week as part of an experiment.
+
+     {""pid"": ""doc-1"", ""explanation"": ""directly answers the query"", ""relevance"": 3}
+     {""pid"": ""doc-3"", ""explanation"": ""addresses the query in a general sense"", ""relevance"": 2}
+     {""pid"": ""doc-2"", ""explanation"": ""does not directly answer the query"", ""relevance"": 1}"
+q48	['p832', 'p1022', 'p9140']	"Here is the order of the passages in terms of relevance to the query: doc-3, doc-1, doc-2. 
+
+The passage doc-3 is the most relevant because it directly answers the query, stating that increasing strength can take as little as training once a week. 
+
+Passage doc-1 is also relevant as it discusses the benefits of weight training, including muscle-building benefits, which is related to the query. 
+
+Passage doc-2 is less relevant as it discusses a specific approach to strength training and does not directly address the query.
+
+Here are the relevance scores in JSON format:
+
+{""pid"": ""doc-3"", ""explanation"": ""Directly answers the query"", ""relevance"": 3}
+{""pid"": ""doc-1"", ""explanation"": ""Related to the query, discusses benefits of weight training"", ""relevance"": 2}
+{""pid"": ""doc-2"", ""explanation"": ""Less relevant, discusses a specific approach to strength training"", ""relevance"": 1}"
+q48	['p1663', 'p10228', 'p3459']	"Here is my evaluation:
+
+     The order of relevance is: doc-1, doc-2, doc-3.
+
+     Explanation: Doc-1 is the most relevant because it directly addresses the query by mentioning strength training once a week for older adults. Doc-2 and Doc-3 are identical and irrelevant to the query as they discuss iPad deals and prices.
+
+     {""pid"": ""doc-1"", ""explanation"": ""Directly addresses the query"", ""relevance"": 3}
+     {""pid"": ""doc-2"", ""explanation"": ""Irrelevant, discusses iPad deals"", ""relevance"": 0}
+     {""pid"": ""doc-3"", ""explanation"": ""Irrelevant, discusses iPad deals"", ""relevance"": 0}"
+q48	['p3354', 'p9770', 'p8920']	"The order of the passages is doc-2, doc-3, doc-1 because doc-2 and doc-3 directly address the query about strength training frequency for adults, whereas doc-1 is unrelated to the query.
+
+     {""pid"": ""doc-2"", ""explanation"": """", ""relevance"": 2}
+     {""pid"": ""doc-3"", ""explanation"": """", ""relevance"": 2}
+     {""pid"": ""doc-1"", ""explanation"": """", ""relevance"": 0}"
+q48	['p5273', 'p6304', 'p5244']	"Explanation: I arranged the passages in order of relevance based on the specific mention of training frequency for older adults. Doc-1 directly addresses the query, mentioning the recommended frequency for healthy older adults. Doc-2 provides a specific exercise program that trains each body part once per week, which is relevant to the query. Doc-3 is less relevant as it discusses the optimal training frequency for muscle growth in general, without specifically focusing on older adults.
+
+    {""pid"": ""doc-1"", ""explanation"": ""Directly addresses the query with recommended frequency for healthy older adults"", ""relevance"": 3}
+    {""pid"": ""doc-2"", ""explanation"": ""Provides a specific exercise program that trains each body part once per week"", ""relevance"": 2}
+    {""pid"": ""doc-3"", ""explanation"": ""Discusses optimal training frequency for muscle growth in general"", ""relevance"": 1}"
+q48	['p7138', 'p2624', 'p3563']	"Explanation: The passages are ordered based on their relevance to the query about older adults gaining strength by training once per week. Passage 2 is the most relevant as it directly addresses the frequency of training and its impact on strength gains. Passage 3 is somewhat related as it discusses strength training, but it doesn't specifically address the frequency or older adults. Passage 1 is irrelevant as it only talks about the deadlift exercise and its muscle groups.
+
+     {""pid"": ""doc-2"", ""explanation"": """", ""relevance"": 2}
+     {""pid"": ""doc-3"", ""explanation"": """", ""relevance"": 1}
+     {""pid"": ""doc-1"", ""explanation"": """", ""relevance"": 0}"
+q48	['p9337', 'p3580', 'p5545']	"Here is the order of the passages in terms of relevance to the query: doc-3, doc-2, doc-1.
+
+Explanation: The most relevant passage is doc-3 because it directly addresses the query by mentioning a study that compared training each muscle group once a week. Doc-2 is related to the query as it discusses strength training for older adults, but it doesn't specifically address the frequency of training. Doc-1 is less relevant as it presents some data on strength gain and loss in older adults, but it doesn't provide a direct answer to the query.
+
+Here are the relevance scores in JSON format:
+
+{""pid"": ""doc-3"", ""explanation"": ""Directly addresses the query"", ""relevance"": 3}
+{""pid"": ""doc-2"", ""explanation"": ""Related to the query, but doesn't answer it directly"", ""relevance"": 1}
+{""pid"": ""doc-1"", ""explanation"": ""Presents some related data, but doesn't answer the query"", ""relevance"": 1}"
+q48	['p1660', 'p1591', 'p8542']	"Brief explanation: The passages are ordered based on their direct relevance to the query, with doc-1 and doc-3 providing direct answers and doc-2 being related but not directly addressing the query.
+     {""pid"": ""doc-1"", ""explanation"": """", ""relevance"": 3}
+     {""pid"": ""doc-3"", ""explanation"": """", ""relevance"": 3}
+     {""pid"": ""doc-2"", ""explanation"": """", ""relevance"": 1}"
+q48	['p2085', 'p8023', 'p6923']	"Brief explanation: The passages are arranged in order of relevance based on the presence of keywords related to strength training and older adults. Passage 2 is the most relevant as it describes a specific strength training program for older adults. Passage 1 is related as it mentions texts about strength training for older adults. Passage 3 is irrelevant as it appears to be a list of college degrees and subjects.
+
+     {""pid"": ""doc-2"", ""explanation"": ""Describes a specific strength training program for older adults"", ""relevance"": 2}
+     {""pid"": ""doc-1"", ""explanation"": ""Mentions texts about strength training for older adults"", ""relevance"": 1}
+     {""pid"": ""doc-3"", ""explanation"": ""List of college degrees and subjects, unrelated to the query"", ""relevance"": 0}"
+q48	['p8918', 'p2709', 'p8260']	"Here is the order of the passages in terms of relevance to the query:
+
+     The most relevant passage is doc-1, as it directly addresses the query about strength training for older adults and provides specific recommendations for the frequency of training. 
+
+     The second most relevant passage is doc-3, which discusses different types of workout plans, including those that involve training 2-3 times per week, which is somewhat related to the query.
+
+     The least relevant passage is doc-2, which appears to be unrelated to the query, discussing MLB schedules and statistics.
+
+     Here are the relevance scores in JSON format:
+
+     {""pid"": ""doc-1"", ""explanation"": ""Directly addresses the query and provides specific recommendations"", ""relevance"": 3}
+     {""pid"": ""doc-3"", ""explanation"": ""Discusses different types of workout plans, including those related to the query"", ""relevance"": 2}
+     {""pid"": ""doc-2"", ""explanation"": ""Unrelated to the query, discussing MLB schedules and statistics"", ""relevance"": 0}"
+q48	['p3200', 'p108', 'p5277']	"Here is the explanation and relevance scores for each passage:
+
+     The passages are arranged in order of relevance to the query, with doc-2 being the most relevant as it directly addresses the query about strength training once per week. Doc-3 is also relevant as it discusses the frequency of strength training, although it presents a contrasting view. Doc-1 is irrelevant as it appears to be a product advertisement.
+
+     {""pid"": ""doc-1"", ""explanation"": ""Irrelevant product advertisement"", ""relevance"": 0}
+     {""pid"": ""doc-3"", ""explanation"": ""Related to query, presents contrasting view"", ""relevance"": 1}
+     {""pid"": ""doc-2"", ""explanation"": ""Directly addresses query, provides relevant information"", ""relevance"": 2}"
+q48	['p7252', 'p684', 'p2293']	"I arranged the passages in order of relevance to the query as follows: doc-3, doc-1, doc-2. 
+
+     The passage doc-3 is the most relevant as it discusses deadlifts, which is a form of strength training, and mentions the benefits of using dumbbells. 
+
+     Passage doc-1 is somewhat related as it talks about exercising and preventing injury, but it does not directly address the query about older adults gaining strength by training once per week. 
+
+     Passage doc-2 is irrelevant as it only provides credits to a certified trainer and does not discuss strength training or older adults. 
+
+     Here are the relevance scores in JSON format:
+
+     {""pid"": ""doc-3"", ""explanation"": ""Discusses deadlifts and strength training"", ""relevance"": 2}
+     {""pid"": ""doc-1"", ""explanation"": ""Talks about exercising and preventing injury"", ""relevance"": 1}
+     {""pid"": ""doc-2"", ""explanation"": ""Provides credits to a certified trainer"", ""relevance"": 0}"
