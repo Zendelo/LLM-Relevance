@@ -21,7 +21,7 @@ do
   python -u generate_judgments.py \
     --prompts val_rel_prompt-$i.tsv \
     --model_id 'meta-llama/Meta-Llama-3-8B-Instruct' \
-    --output raw_output_rel_p-$i-val \
+    --output llm_raw_output/raw_output_rel_p-$i-val \
     --max_new_tokens 512 \
     --batch_size 16
 done
