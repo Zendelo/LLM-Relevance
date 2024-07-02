@@ -125,6 +125,14 @@ def parse_arguments():
     return parser.parse_args()
 
 
+def read_qrel_file(qrel_file):
+    return pd.read_csv(qrel_file, sep='\s+')
+
+
+def read_queries(queries_file):
+    return pd.read_csv(queries_file, sep='\t', names=['qid', 'qtext'], header=None, index_col=0)
+
+
 if __name__ == '__main__':
 
     args = parse_arguments()
@@ -157,8 +165,8 @@ if __name__ == '__main__':
     else:
         if n_docs > 1:
             print(f'Generating prompts with {n_docs} documents')
-            query_data = pd.read_csv(queries_file, sep='\t', names=['qid', 'qtext'], header=None, index_col=0)
-            qrel_data = pd.read_csv(qrel_file, sep='\t')
+            query_data = read_queries(queries_file)
+            qrel_data = read_qrel_file(qrel_file)
 
             # construct the prompts for the model
             prompts = []
@@ -176,8 +184,8 @@ if __name__ == '__main__':
 
         else:
             print("Generating prompts with queries and documents")
-            query_data = pd.read_csv(queries_file, sep='\t', names=['qid', 'qtext'], header=None, index_col=0)
-            qrel_data = pd.read_csv(qrel_file, sep='\t')
+            query_data = read_queries(queries_file)
+            qrel_data = read_qrel_file(qrel_file)
 
             # construct the prompts for the model
             prompts = []
