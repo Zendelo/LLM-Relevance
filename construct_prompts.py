@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from nltk.corpus import stopwords
 
 STOPWORDS = set(stopwords.words('english'))
+DROP_DOC_TOKEN = 'Spam document. Please ignore.'
 
 
 def clean_text(text: str, threshold=1024, truncate=False) -> str:
@@ -90,13 +91,13 @@ def read_docs(docs_file):
                              longest_non_whitespace=docs_df['doc'].str.extract(r'(\S{2,})').map(len))
 
     # remove documents with less than 2.5% stopwords and more than 1024 characters
-    docs_df.loc[(docs_df['sw_ratio'] < 0.025) & (docs_df['doc_len'] > 1024), 'doc'] = ''
+    docs_df.loc[(docs_df['sw_ratio'] < 0.025) & (docs_df['doc_len'] > 1024), 'doc'] = DROP_DOC_TOKEN
     # remove documents with more than 150 non-alphanumeric characters
-    docs_df.loc[docs_df.non_alnum_count > 150, 'doc'] = ''
+    docs_df.loc[docs_df.non_alnum_count > 150, 'doc'] = DROP_DOC_TOKEN
     # remove documents with less than 1% stopwords and more than 20% non-alphanumeric characters
-    docs_df.loc[(docs_df['sw_ratio'] < 0.01) & (docs_df['non_alnum_ratio'] > 0.2), 'doc'] = ''
+    docs_df.loc[(docs_df['sw_ratio'] < 0.01) & (docs_df['non_alnum_ratio'] > 0.2), 'doc'] = DROP_DOC_TOKEN
     # remove documents with sequnce longer than 25 characters
-    docs_df.loc[docs_df['longest_non_whitespace'] >= 25, 'doc'] = ''
+    docs_df.loc[docs_df['longest_non_whitespace'] >= 25, 'doc'] = DROP_DOC_TOKEN
 
     return docs_df.assign(sw_ratio=docs_df.doc.apply(compute_stopwords_ratio),
                           doc_len=docs_df.doc.str.len(),
