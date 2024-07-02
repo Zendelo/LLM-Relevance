@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=relJud
-#SBATCH --output=rel-p4-70b.txt
-#SBATCH --error=rel-p4-70b.err
+#SBATCH --output=rel-all-4-8b.txt
+#SBATCH --error=rel-all-4-8b.err
 #SBATCH --partition=SEG
 
 #SBATCH --gres=gpu:2
