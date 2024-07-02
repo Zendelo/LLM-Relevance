@@ -16,13 +16,12 @@
 cd /opt/home/e103037/repos/LLM-Relevance/
 
 # run inference for different prompts
-for i in {1..4}
+for i in {6..7}
 do
   python -u generate_judgments.py \
     --prompts val_rel_prompt-$i.tsv \
     --model_id 'meta-llama/Meta-Llama-3-8B-Instruct' \
     --output llm_raw_output/raw_output_rel_p-$i-val \
-    --max_new_tokens 512 \
-    --batch_size 16
+    --max_new_tokens 32 \
+    --batch_size 32
 done
-
