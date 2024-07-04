@@ -1,9 +1,10 @@
 import argparse
 import logging
 import os
-import sys
 import subprocess
+import sys
 
+import numpy as np
 import pandas as pd
 import torch
 import tqdm
@@ -151,7 +152,7 @@ def parse_arguments():
     parser.add_argument('--model_id', type=str, default='meta-llama/Meta-Llama-3-8B-Instruct', help='Model ID or path')
     parser.add_argument('--batch_size', type=int, default=32, help='Batch size')
     parser.add_argument('--max_new_tokens', type=int, default=256, help='Maximum new tokens')
-    parser.add_argument('--max_input_length', type=int, default=2048, help='Maximum input length')
+    parser.add_argument('--max_input_length', type=int, default=4096, help='Maximum input length')
 
     return parser.parse_args()
 
@@ -223,17 +224,24 @@ if __name__ == '__main__':
     else:
         raise ValueError(f'Prompts file should have either 2 or 4 columns, found {prompts_df.shape[1]} columns.')
 
-    # Attempt to generate predictions up to 10 times
-    for i in range(10):
+    # Attempt to generate predictions up to 5 times, dividing the batch size by 2 each time
+    for i in range(5):
         output, failed_batches = generate_predictions(_df, batch_size, max_new_tokens, max_input_length)
         logger.info(f'Saving output to {output_file.format(i)}')
         pd.DataFrame(output).to_csv(output_file.format(i), index=False, sep='\t')
         if not failed_batches:
             break
         else:
-            logger.error(
-                f"{len(failed_batches)} failed batches. Resizing the batch_size from {batch_size} to {batch_size // 2}")
-            batch_size //= 2
+            if batch_size <= 2:
+                logger.error("Failed to generate predictions for some examples. Please check the failed_batches.")
+                logger.error(f"Batch size is already at the minimum value of {batch_size}."
+                             f"Trying to reshuffle the failed batches.")
+                # shuffle the failed batches
+                failed_batches = np.random.permutation(failed_batches)
+            else:
+                logger.error(
+                    f"{len(failed_batches)} failed batches. Resizing the batch_size from {batch_size} to {batch_size // 2}")
+                batch_size //= 2
             logger.info('Retrying...')
         _df = pd.concat([_df.iloc[rng] for rng in failed_batches]).reset_index(drop=True)
     else:
