@@ -48,17 +48,21 @@ def compute_stopwords_ratio(text: str) -> float:
 
 def get_prompt(instructions, document, query=None):
     if query is None:
-        prompt = f"""<|start_header_id|>system<|end_header_id|>{instructions}<|eot_id|>
-        <|start_header_id|>user<|end_header_id|>
-    Document: {document}
-    <|eot_id|><|start_header_id|>assistant<|end_header_id|>
+        prompt = f"""<|start_header_id|>system<|end_header_id|>
+        
+        {instructions}<|eot_id|><|start_header_id|>user<|end_header_id|>
+        
+        Document: {document}<|eot_id|>
+        <|start_header_id|>assistant<|end_header_id|>
     """
     else:
-        prompt = f"""<|start_header_id|>system<|end_header_id|>{instructions}<|eot_id|>
-        <|start_header_id|>user<|end_header_id|>
-    Query: {query}
-    Document: {document}
-    <|eot_id|><|start_header_id|>assistant<|end_header_id|>
+        prompt = f"""<|start_header_id|>system<|end_header_id|>
+        
+        {instructions}<|eot_id|><|start_header_id|>user<|end_header_id|>
+        
+        Query: {query}
+        Document: {document}<|eot_id|>
+        <|start_header_id|>assistant<|end_header_id|>
     """
     return prompt
 
@@ -66,17 +70,17 @@ def get_prompt(instructions, document, query=None):
 def get_prompt_multi_docs(instructions, documents, query=None):
     expanded_docs = '\n\n'.join([f'doc-{i}: {doc}' for i, doc in enumerate(documents, start=1)])
     if query is None:
-        prompt = f"""<|start_header_id|>system<|end_header_id|>{instructions}<|eot_id|>
-        <|start_header_id|>user<|end_header_id|>
-    *Documents*:\n\n{expanded_docs}\n\n
-    <|eot_id|><|start_header_id|>assistant<|end_header_id|>
+        prompt = f"""<|start_header_id|>system<|end_header_id|>
+        {instructions} <|eot_id|><|start_header_id|>user<|end_header_id|>
+    *Documents*:\n\n{expanded_docs}\n\n<|eot_id|>
+    <|start_header_id|>assistant<|end_header_id|>
     """
     else:
         prompt = f"""<|start_header_id|>system<|end_header_id|>{instructions}<|eot_id|>
         <|start_header_id|>user<|end_header_id|>
     *Query*: {query}
-    *Documents*:\n\n{expanded_docs}\n\n
-    <|eot_id|><|start_header_id|>assistant<|end_header_id|>
+    *Documents*:\n\n{expanded_docs}\n\n<|eot_id|>
+    <|start_header_id|>assistant<|end_header_id|>
     """
     return prompt
 
