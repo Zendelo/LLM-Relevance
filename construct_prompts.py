@@ -1,5 +1,6 @@
 import argparse
 import json
+import logging
 
 import numpy as np
 import pandas as pd
@@ -7,7 +8,10 @@ from bs4 import BeautifulSoup
 from nltk.corpus import stopwords
 
 STOPWORDS = set(stopwords.words('english'))
-DROP_DOC_TOKEN = 'Spam document. Please ignore.'
+DROP_DOC_TOKEN = 'Spam document. Ignore it and count it as non-relevant.'
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 
 def clean_text(text: str, threshold=1024, truncate=False) -> str:
@@ -23,11 +27,13 @@ def clean_text(text: str, threshold=1024, truncate=False) -> str:
     soup = BeautifulSoup(text, "html.parser")
     output = soup.get_text()
     output = " ".join(output.split())
-    if len(output) > threshold:
-        # logger.warning(f"Text might be too long: {len(output)} terms.")
-        # logger.debug(f"Long Text: {output[:30]} ... {output[-30:]}")
+    if len(output.split()) > threshold:
+        logger.warning(f"Text might be too long: {len(output.split())} terms.")
+        logger.debug(f"Long Text: {output[:100]} ... {output[-100:]}")
         if truncate:
-            output = output[:threshold]
+            output = " ".join(output.split()[:threshold])
+            logger.warning(f"Truncated text to {threshold} terms.")
+            logger.debug(f"Truncated Text: {output[:100]} ... {output[-100:]}")
             # logger.debug(f"Truncated Text: {output}")
     return output
 
@@ -86,7 +92,7 @@ def get_prompt_multi_docs(instructions, documents, query=None):
 
 
 def read_docs(docs_file):
-    docs_df = (pd.read_json(docs_file, lines=True).map(clean_text).set_index('docid'))
+    docs_df = (pd.read_json(docs_file, lines=True).map(clean_text, threshold=2048, truncate=True).set_index('docid'))
 
     docs_df = docs_df.assign(sw_ratio=docs_df.doc.apply(compute_stopwords_ratio),
                              doc_len=docs_df.doc.str.len(),
