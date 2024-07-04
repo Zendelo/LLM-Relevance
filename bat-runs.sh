@@ -19,9 +19,9 @@ cd /opt/home/e103037/repos/LLM-Relevance/
 for i in {9..5}
 do
   python -u generate_judgments.py \
-    --prompts val_rel_prompt-$i.tsv \
+    --prompts prompts/val_rel_prompt-${i}.tsv \
     --model_id 'meta-llama/Meta-Llama-3-8B-Instruct' \
-    --output llm_raw_output/raw_output_rel_p-$i-val \
+    --output llm_raw_output/raw_output_rel_p-${i}-val \
     --max_new_tokens 8 \
     --batch_size 32
 done
