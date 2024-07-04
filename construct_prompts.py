@@ -10,7 +10,7 @@ from nltk.corpus import stopwords
 STOPWORDS = set(stopwords.words('english'))
 DROP_DOC_TOKEN = 'Spam document. Ignore it and count it as non-relevant.'
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
