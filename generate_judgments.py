@@ -230,6 +230,7 @@ if __name__ == '__main__':
         logger.info(f'Saving output to {output_file.format(i)}')
         pd.DataFrame(output).to_csv(output_file.format(i), index=False, sep='\t')
         if not failed_batches:
+            logger.info("All predictions generated successfully.")
             break
         else:
             if batch_size <= 2:
