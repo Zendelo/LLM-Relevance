@@ -245,7 +245,7 @@ if __name__ == '__main__':
                     f"{len(failed_batches)} failed batches. Resizing the batch_size from {batch_size} to {batch_size // 2}")
                 batch_size //= 2
             logger.info('Retrying...')
-        _df = pd.concat([_df.iloc[rng] for rng in failed_batches]).sample(1, replace=False).reset_index(drop=True)
+        _df = pd.concat([_df.iloc[rng] for rng in failed_batches]).sample(frac=1, replace=False).reset_index(drop=True)
     else:
         logger.error("Failed to generate predictions for some examples. Please check the failed_batches.")
         logger.error(f"Failed batches: {failed_batches}")
