@@ -1,7 +1,7 @@
 # Generate prompts for the LLM4Eval dataset
 # iterate over the different prompts and generate judgments
 
-for set in {"val","train"}
+for set in {val,train,test}
 do
   echo "Processing $set set"
   for i in {1..9}
