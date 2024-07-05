@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=relJud
-#SBATCH --output=rel-all-4-8b.txt
-#SBATCH --error=rel-all-4-8b.err
+#SBATCH --job-name=relJudVal
+#SBATCH --output=rel-val-8b.txt
+#SBATCH --error=rel-val-8b.err
 #SBATCH --partition=SEG
 
 #SBATCH --gres=gpu:2
@@ -15,13 +15,15 @@
 
 cd /opt/home/e103037/repos/LLM-Relevance/
 
+# set the prompts dataset
+dataset=val
 # run inference for different prompts
-for i in {9..5}
+for i in {9..1}
 do
   python -u generate_judgments.py \
-    --prompts prompts/val_rel_prompt-${i}.tsv \
+    --prompts prompts/${dataset}_rel_prompt-${i}.tsv \
     --model_id 'meta-llama/Meta-Llama-3-8B-Instruct' \
-    --output llm_raw_output/raw_output_rel_p-${i}-val \
+    --output llm_raw_output/raw_output_rel_p-${i}-${dataset} \
     --max_new_tokens 8 \
-    --batch_size 32
+    --batch_size 128
 done
