@@ -147,7 +147,7 @@ def generate_predictions(_df, batch_size, max_new_tokens, max_input_length):
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Construct prompts for the model')
-    parser.add_argument('--prompts', type=str, default='data', help='Path to the prompts JSON file')
+    parser.add_argument('--prompts', type=str, default='data', help='Path to the prompts tsv file')
     parser.add_argument('--output', type=str, default='raw_output_run', help='Path to the output TSV file')
     parser.add_argument('--model_id', type=str, default='meta-llama/Meta-Llama-3-8B-Instruct', help='Model ID or path')
     parser.add_argument('--batch_size', type=int, default=32, help='Batch size')
@@ -218,12 +218,13 @@ if __name__ == '__main__':
     # Load the validation prompts
     prompts_df = pd.read_csv(prompts_file, sep='\t')
 
-    if prompts_df.shape[1] == 4:
+    try:
         _df = prompts_df[['qid', 'docid', 'prompt']].reset_index(drop=True)
-    elif prompts_df.shape[1] == 2:
+    except KeyError:
         _df = prompts_df[['docid', 'prompt']].reset_index(drop=True)
-    else:
-        raise ValueError(f'Prompts file should have either 2 or 4 columns, found {prompts_df.shape[1]} columns.')
+    except Exception as e:
+        logger.error(f"Error in reading prompts file: {e}")
+        sys.exit(1)
 
     # Attempt to generate predictions up to 5 times, dividing the batch size by 2 each time
     for i in range(5):
@@ -237,15 +238,14 @@ if __name__ == '__main__':
             if batch_size <= 2:
                 logger.error("Failed to generate predictions for some examples. Please check the failed_batches.")
                 logger.error(f"Batch size is already at the minimum value of {batch_size}."
-                             f"Trying to reshuffle the failed batches.")
-                # shuffle the failed batches
-                failed_batches = np.random.permutation(failed_batches)
+                             f"Will reshuffle the failed batches and try again.")
             else:
                 logger.error(
                     f"{len(failed_batches)} failed batches. Resizing the batch_size from {batch_size} to {batch_size // 2}")
                 batch_size //= 2
             logger.info('Retrying...')
         _df = pd.concat([_df.iloc[rng] for rng in failed_batches]).sample(frac=1, replace=False).reset_index(drop=True)
+        _df.to_csv('failed_batches_df-temp.tsv', sep='\t')
     else:
         logger.error("Failed to generate predictions for some examples. Please check the failed_batches.")
         logger.error(f"Failed batches: {failed_batches}")
