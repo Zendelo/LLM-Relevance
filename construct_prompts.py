@@ -59,8 +59,7 @@ def get_prompt(instructions, document, query=None):
         {instructions}<|eot_id|><|start_header_id|>user<|end_header_id|>
         
         Document: {document}<|eot_id|>
-        <|start_header_id|>assistant<|end_header_id|>
-    """
+        <|start_header_id|>assistant<|end_header_id|>"""
     else:
         prompt = f"""<|start_header_id|>system<|end_header_id|>
         
@@ -68,8 +67,7 @@ def get_prompt(instructions, document, query=None):
         
         Query: {query}
         Document: {document}<|eot_id|>
-        <|start_header_id|>assistant<|end_header_id|>
-    """
+        <|start_header_id|>assistant<|end_header_id|>"""
     return prompt
 
 
@@ -79,15 +77,13 @@ def get_prompt_multi_docs(instructions, documents, query=None):
         prompt = f"""<|start_header_id|>system<|end_header_id|>
         {instructions} <|eot_id|><|start_header_id|>user<|end_header_id|>
     *Documents*:\n\n{expanded_docs}\n\n<|eot_id|>
-    <|start_header_id|>assistant<|end_header_id|>
-    """
+    <|start_header_id|>assistant<|end_header_id|>"""
     else:
         prompt = f"""<|start_header_id|>system<|end_header_id|>{instructions}<|eot_id|>
         <|start_header_id|>user<|end_header_id|>
     *Query*: {query}
     *Documents*:\n\n{expanded_docs}\n\n<|eot_id|>
-    <|start_header_id|>assistant<|end_header_id|>
-    """
+    <|start_header_id|>assistant<|end_header_id|>"""
     return prompt
 
 
