@@ -245,7 +245,7 @@ if __name__ == '__main__':
                 batch_size //= 2
             logger.info('Retrying...')
         _df = pd.concat([_df.iloc[rng] for rng in failed_batches]).sample(frac=1, replace=False).reset_index(drop=True)
-        _df.to_csv('failed_batches_df-temp.tsv', sep='\t')
+        _df.to_csv('failed_batch' + output_file.format(i), sep='\t')
     else:
         logger.error("Failed to generate predictions for some examples. Please check the failed_batches.")
         logger.error(f"Failed batches: {failed_batches}")
