@@ -11,6 +11,8 @@ import tqdm
 import transformers
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 
+from utils import ensure_dir
+
 
 def smart_tokenizer_and_embedding_resize(
         special_tokens_dict: dict,
@@ -245,7 +247,8 @@ if __name__ == '__main__':
                 batch_size //= 2
             logger.info('Retrying...')
         _df = pd.concat([_df.iloc[rng] for rng in failed_batches]).sample(frac=1, replace=False).reset_index(drop=True)
-        _df.to_csv('failed_batches/' + output_file.format(i), sep='\t')
+        _dir = ensure_dir('failed_batches/', create_if_not=True)
+        _df.to_csv(_dir + '/' + output_file.format(i), sep='\t')
     else:
         logger.error("Failed to generate predictions for some examples. Please check the failed_batches.")
         logger.error(f"Failed batches: {failed_batches}")

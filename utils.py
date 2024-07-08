@@ -40,7 +40,7 @@ def ensure_dir(file_path, create_if_not=True):
             try:
                 os.makedirs(directory)
             except FileExistsError:
-                # This exception was added for multiprocessing, in case multiple process try to create the directory
+                # This exception was added for multiprocessing, in case multiple processes try to create the directory
                 pass
         else:
             raise FileNotFoundError(f"The directory {directory} doesnt exist, create it or pass create_if_not=True")
