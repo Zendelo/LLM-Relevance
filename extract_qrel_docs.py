@@ -12,8 +12,8 @@ def extract_text(doc):
     if isinstance(text, bytes):
         try:
             text = text.decode('utf-8')
-        except UnicodeDecodeError as e:
-            print(f'Error decoding text: {e}')
+        except Exception as e:
+            print(f'Error decoding text: \n{e}\n')
             print('Document will be skipped')
             text = '-*-*-*-* ERROR DECODING TEXT *-*-*-*-'
     return ' '.join(text.split())
