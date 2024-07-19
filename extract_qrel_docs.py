@@ -1,4 +1,5 @@
 import os
+import sys
 from glob import glob
 
 import ir_datasets
@@ -9,7 +10,13 @@ from tqdm import tqdm
 def extract_text(doc):
     text = doc.body
     if isinstance(text, bytes):
-        text = text.decode('utf-8')
+        try:
+            text = text.decode('utf-8')
+        except UnicodeDecodeError as e:
+            print(e)
+            print(doc)
+            print(text)
+            sys.exit(1)
     return ' '.join(text.split())
 
 
