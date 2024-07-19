@@ -18,4 +18,8 @@ docstore = ir_datasets.wrappers.HtmlDocExtractor(dataset14).docs_store()
 
 docs = docstore.get_many(unique_docs)
 docs_df = pd.DataFrame(index=docs.keys(), data=map(lambda x: ' '.join(x.body.split()), docs.values()), columns=['doc'])
-docs_df.to_csv('cw12-docs.tsv', sep='\t', index=True, header=False)
+docs_df.index.name = 'docid'
+
+qdf.to_csv('cw12-queries.tsv', sep='\t', index=False, header=True)
+qrel_df.to_csv('cw12-qrels.tsv', sep='\t', index=False, header=True)
+docs_df.to_csv('cw12-docs.tsv', sep='\t', index=True, header=True)
