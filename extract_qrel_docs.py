@@ -43,7 +43,12 @@ for i, b in tqdm(enumerate(range(0, len(unique_docs), batch_size))):
                            data=map(extract_text, docs.values()),
                            columns=['doc'])
     docs_df.index.name = 'docid'
-    docs_df.to_csv(f'cw12-docs-{i}.tsv', sep='\t', index=True, header=True)
+    try:
+        docs_df.to_csv(f'cw12-docs-{i}.tsv', sep='\t', index=True, header=True)
+    except Exception as e:
+        print(f'Error saving batch {i}: \n{e}')
+        print(docs_df)
+        docs_df.to_csv(f'cw12-docs-{i}.tsv', sep='\t', index=False, header=True, escapechar='\\')
 
 qdf.to_csv('cw12-queries.tsv', sep='\t', index=False, header=True)
 qrel_df.to_csv('cw12-qrels.tsv', sep='\t', index=False, header=True)
