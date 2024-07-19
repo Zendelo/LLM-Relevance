@@ -5,6 +5,14 @@ import ir_datasets
 import pandas as pd
 from tqdm import tqdm
 
+
+def extract_text(doc):
+    text = doc.body
+    if isinstance(text, bytes):
+        text = text.decode('utf-8')
+    return ' '.join(text.split())
+
+
 dataset13 = ir_datasets.load("clueweb12/trec-web-2013")
 dataset14 = ir_datasets.load("clueweb12/trec-web-2014")
 
@@ -22,11 +30,12 @@ docstore = ir_datasets.wrappers.HtmlDocExtractor(dataset14).docs_store()
 
 # do it in batches
 batch_size = 500
+
 for i, b in tqdm(enumerate(range(0, len(unique_docs), batch_size))):
     batch = unique_docs[b:b + batch_size]
     docs = docstore.get_many(batch)
     docs_df = pd.DataFrame(index=docs.keys(),
-                           data=map(lambda x: ' '.join(x.body.decode("utf-8").split()), docs.values()),
+                           data=map(extract_text, docs.values()),
                            columns=['doc'])
     docs_df.index.name = 'docid'
     docs_df.to_csv(f'cw12-docs-{i}.tsv', sep='\t', index=True, header=True)
