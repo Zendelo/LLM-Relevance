@@ -25,7 +25,8 @@ batch_size = 1000
 for i, b in tqdm(enumerate(range(0, len(unique_docs), batch_size))):
     batch = unique_docs[b:b + batch_size]
     docs = docstore.get_many(batch)
-    docs_df = pd.DataFrame(index=docs.keys(), data=map(lambda x: ' '.join(x.body.split()), docs.values()),
+    docs_df = pd.DataFrame(index=docs.keys(),
+                           data=map(lambda x: ' '.join(x.decode("utf-8").body.split()), docs.values()),
                            columns=['doc'])
     docs_df.index.name = 'docid'
     docs_df.to_csv(f'cw12-docs-{i}.tsv', sep='\t', index=True, header=True)
