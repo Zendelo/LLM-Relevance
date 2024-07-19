@@ -1,5 +1,9 @@
+import os
+from glob import glob
+
 import ir_datasets
 import pandas as pd
+from tqdm import tqdm
 
 dataset13 = ir_datasets.load("clueweb12/trec-web-2013")
 dataset14 = ir_datasets.load("clueweb12/trec-web-2014")
@@ -16,10 +20,24 @@ unique_docs = qrel_df['docid'].unique()
 docstore = ir_datasets.wrappers.HtmlDocExtractor(dataset14).docs_store()
 # docstore = dataset14.docs_store()
 
-docs = docstore.get_many(unique_docs)
-docs_df = pd.DataFrame(index=docs.keys(), data=map(lambda x: ' '.join(x.body.split()), docs.values()), columns=['doc'])
-docs_df.index.name = 'docid'
+# do it in batches
+batch_size = 1000
+for i, b in tqdm(enumerate(range(0, len(unique_docs), batch_size))):
+    batch = unique_docs[b:b + batch_size]
+    docs = docstore.get_many(batch)
+    docs_df = pd.DataFrame(index=docs.keys(), data=map(lambda x: ' '.join(x.body.split()), docs.values()),
+                           columns=['doc'])
+    docs_df.index.name = 'docid'
+    docs_df.to_csv(f'cw12-docs-{i}.tsv', sep='\t', index=True, header=True)
 
 qdf.to_csv('cw12-queries.tsv', sep='\t', index=False, header=True)
 qrel_df.to_csv('cw12-qrels.tsv', sep='\t', index=False, header=True)
-docs_df.to_csv('cw12-docs.tsv', sep='\t', index=True, header=True)
+
+# docs_df.to_csv('cw12-docs.tsv', sep='\t', index=True, header=True)
+
+docs_files = glob('cw12-docs-*.tsv')
+docs_df = pd.concat([pd.read_csv(f, header=0, sep='\t') for f in docs_files])
+docs_df.to_csv('cw12-docs.tsv', sep='\t', index=False, header=True)
+# delete the files
+for f in docs_files:
+    os.remove(f)
