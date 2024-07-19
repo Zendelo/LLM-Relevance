@@ -1,5 +1,4 @@
 import os
-import sys
 from glob import glob
 
 import ir_datasets
@@ -13,9 +12,9 @@ def extract_text(doc):
         try:
             text = text.decode('utf-8')
         except Exception as e:
-            print(f'Error decoding text: \n{e}\n')
+            print(f'Error decoding text: \n{e}')
             print('Document will be skipped')
-            text = '-*-*-*-* ERROR DECODING TEXT *-*-*-*-'
+            return '-*-*-*-* ERROR DECODING TEXT *-*-*-*-'
     return ' '.join(text.split())
 
 
