@@ -45,6 +45,9 @@ for i, b in tqdm(enumerate(range(0, len(unique_docs), batch_size))):
     docs_df.index.name = 'docid'
     try:
         docs_df.to_csv(f'cw12-docs-{i}.tsv', sep='\t', index=True, header=True, escapechar='\\')
+    except UnicodeEncodeError:
+        docs_df.map(lambda x: x.encode('utf-8', errors='replace')).to_csv(f'cw12-docs-{i}.tsv', sep='\t',
+                                                                          index=True, header=True, escapechar='\\')
     except Exception as e:
         print(f'Error saving batch {i}: {e}')
         print(f'*** Check the documents in range {b} to {b + batch_size} ***')
