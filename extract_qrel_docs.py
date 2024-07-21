@@ -10,7 +10,7 @@ def extract_text(doc):
     text = doc.body
     if isinstance(text, bytes):
         try:
-            text = text.decode('utf-8')
+            text = text.decode('utf-8', errors='replace')
         except Exception as e:
             print(f'Error decoding text: \n{e}')
             print('Document will be skipped')
