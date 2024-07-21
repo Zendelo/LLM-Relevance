@@ -29,12 +29,12 @@ qrel_df = pd.concat([pd.DataFrame(dataset13.qrels_iter()), pd.DataFrame(dataset1
     columns={'query_id': 'qid', 'doc_id': 'docid'})
 qrel_df = qrel_df.map(lambda x: ' '.join(x.split()) if isinstance(x, str) else x)
 
-unique_docs = qrel_df['docid'].unique()[5500:6000]
+unique_docs = qrel_df['docid'].unique()
 docstore = ir_datasets.wrappers.HtmlDocExtractor(dataset14).docs_store()
 # docstore = dataset14.docs_store()
 
 # do it in batches
-batch_size = 50
+batch_size = 500
 
 for i, b in tqdm(enumerate(range(0, len(unique_docs), batch_size))):
     batch = unique_docs[b:b + batch_size]
@@ -60,7 +60,7 @@ qrel_df.to_csv('cw12-qrels.tsv', sep='\t', index=False, header=True)
 
 docs_files = glob('cw12-docs-*.tsv')
 docs_df = pd.concat([pd.read_csv(f, header=0, sep='\t') for f in docs_files])
-docs_df.to_csv('cw12-docs+skipped.tsv', sep='\t', index=False, header=True)
+docs_df.to_csv('cw12-docs.tsv', sep='\t', index=False, header=True)
 # delete the files
 for f in docs_files:
     os.remove(f)
