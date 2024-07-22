@@ -32,7 +32,7 @@ dataset14 = ir_datasets.load("clueweb12/trec-web-2014")
 
 if UQV:
     qdf = pd.read_csv(uqv_files['queries'], sep='\t', header=0, usecols=['qid', 'query'])
-    qrel_df = pd.read_csv(uqv_files['qrel'], sep='\t', header=None, names=['qid', 'iteration', 'docid', 'rel'])
+    qrel_df = pd.read_csv(uqv_files['qrel'], sep='\t', header=None, names=['qid', 'iteration', 'docid', 'relevance'])
 
 else:
     qdf = pd.concat([pd.DataFrame(dataset13.queries_iter()), pd.DataFrame(dataset14.queries_iter())]).drop(
@@ -40,7 +40,7 @@ else:
     qdf = qdf.map(lambda x: ' '.join(x.split()))
 
     qrel_df = pd.concat([pd.DataFrame(dataset13.qrels_iter()), pd.DataFrame(dataset14.qrels_iter())]).rename(
-        columns={'query_id': 'qid', 'doc_id': 'docid'})[['qid', 'iteration', 'docid', 'rel']]
+        columns={'query_id': 'qid', 'doc_id': 'docid'})[['qid', 'iteration', 'docid', 'relevance']]
 
 qrel_df = qrel_df.map(lambda x: ' '.join(x.split()) if isinstance(x, str) else x)
 
