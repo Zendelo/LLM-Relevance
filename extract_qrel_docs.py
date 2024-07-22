@@ -1,3 +1,4 @@
+import argparse
 import os
 from glob import glob
 
@@ -18,15 +19,29 @@ def extract_text(doc):
     return ' '.join(text.split())
 
 
+argparser = argparse.ArgumentParser()
+argparser.add_argument('--uqv', action='store_true', help='Use UQV dataset')
+args = argparser.parse_args()
+UQV = args.uqv
+
+uqv_files = {'queries': '/research/remote/petabyte/users/oleg/uqv100/uqv100-uniqueQueries.tsv',
+             'qrel': '/research/remote/petabyte/users/oleg/uqv100/uqv100-allQueries.qrels'}
+
 dataset13 = ir_datasets.load("clueweb12/trec-web-2013")
 dataset14 = ir_datasets.load("clueweb12/trec-web-2014")
 
-qdf = pd.concat([pd.DataFrame(dataset13.queries_iter()), pd.DataFrame(dataset14.queries_iter())]).drop(
-    columns=['type', 'subtopics']).rename(columns={'query_id': 'qid'})
-qdf = qdf.map(lambda x: ' '.join(x.split()))
+if UQV:
+    qdf = pd.read_csv(uqv_files['queries'], sep='\t', header=0, usecols=['qid', 'query'])
+    qrel_df = pd.read_csv(uqv_files['qrel'], sep='\t', header=None, names=['qid', 'iteration', 'docid', 'rel'])
 
-qrel_df = pd.concat([pd.DataFrame(dataset13.qrels_iter()), pd.DataFrame(dataset14.qrels_iter())]).rename(
-    columns={'query_id': 'qid', 'doc_id': 'docid'})
+else:
+    qdf = pd.concat([pd.DataFrame(dataset13.queries_iter()), pd.DataFrame(dataset14.queries_iter())]).drop(
+        columns=['type', 'subtopics']).rename(columns={'query_id': 'qid'})
+    qdf = qdf.map(lambda x: ' '.join(x.split()))
+
+    qrel_df = pd.concat([pd.DataFrame(dataset13.qrels_iter()), pd.DataFrame(dataset14.qrels_iter())]).rename(
+        columns={'query_id': 'qid', 'doc_id': 'docid'})[['qid', 'iteration', 'docid', 'rel']]
+
 qrel_df = qrel_df.map(lambda x: ' '.join(x.split()) if isinstance(x, str) else x)
 
 unique_docs = qrel_df['docid'].unique()
@@ -36,7 +51,7 @@ docstore = ir_datasets.wrappers.HtmlDocExtractor(dataset14).docs_store()
 # do it in batches
 batch_size = 500
 
-for i, b in tqdm(enumerate(range(0, len(unique_docs), batch_size))):
+for i, b in tqdm(enumerate(range(0, len(unique_docs), batch_size)), total=len(unique_docs) // batch_size, unit='batch'):
     batch = unique_docs[b:b + batch_size]
     docs = docstore.get_many(batch)
     docs_df = pd.DataFrame(index=docs.keys(),
