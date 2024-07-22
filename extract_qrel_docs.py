@@ -33,7 +33,9 @@ dataset14 = ir_datasets.load("clueweb12/trec-web-2014")
 if UQV:
     qdf = pd.read_csv(uqv_files['queries'], sep='\t', header=0, usecols=['qid', 'query'])
     qrel_df = pd.read_csv(uqv_files['qrel'], sep='\s+', header=None, names=['qid', 'iteration', 'docid', 'relevance'])
-
+    qrel_file_name = 'cw12-uqv-qrels.tsv'
+    queries_file_name = 'cw12-uqv-queries.tsv'
+    docs_file_name = 'cw12-uqv-docs.tsv'
 else:
     qdf = pd.concat([pd.DataFrame(dataset13.queries_iter()), pd.DataFrame(dataset14.queries_iter())]).drop(
         columns=['type', 'subtopics']).rename(columns={'query_id': 'qid'})
@@ -41,6 +43,9 @@ else:
 
     qrel_df = pd.concat([pd.DataFrame(dataset13.qrels_iter()), pd.DataFrame(dataset14.qrels_iter())]).rename(
         columns={'query_id': 'qid', 'doc_id': 'docid'})[['qid', 'iteration', 'docid', 'relevance']]
+    qrel_file_name = 'cw12-qrels.tsv'
+    queries_file_name = 'cw12-queries.tsv'
+    docs_file_name = 'cw12-docs.tsv'
 
 qrel_df = qrel_df.map(lambda x: ' '.join(x.split()) if isinstance(x, str) else x)
 
@@ -68,14 +73,14 @@ for i, b in tqdm(enumerate(range(0, len(unique_docs), batch_size)), total=len(un
         print(f'*** Check the documents in range {b} to {b + batch_size} ***')
         print('Batch will be skipped')
 
-qdf.to_csv('cw12-queries.tsv', sep='\t', index=False, header=True)
-qrel_df.to_csv('cw12-qrels.tsv', sep='\t', index=False, header=True)
+qdf.to_csv(queries_file_name, sep='\t', index=False, header=True)
+qrel_df.to_csv(qrel_file_name, sep='\t', index=False, header=True)
 
 # docs_df.to_csv('cw12-docs.tsv', sep='\t', index=True, header=True)
 
 docs_files = glob('cw12-docs-*.tsv')
 docs_df = pd.concat([pd.read_csv(f, header=0, sep='\t') for f in docs_files])
-docs_df.to_csv('cw12-docs.tsv', sep='\t', index=False, header=True)
+docs_df.to_csv(docs_file_name, sep='\t', index=False, header=True)
 # delete the files
 for f in docs_files:
     os.remove(f)
